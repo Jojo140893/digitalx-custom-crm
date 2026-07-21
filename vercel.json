@@ -1,0 +1,32 @@
+{
+  "version": 2,
+  "name": "digitalx-enterprise-crm",
+  "framework": "nextjs",
+  "buildCommand": "next build",
+  "devCommand": "next dev",
+  "installCommand": "npm install",
+  "regions": ["syd1", "iad1"],
+  "headers": [
+    {
+      "source": "/(.*)",
+      "headers": [
+        {
+          "key": "X-Frame-Options",
+          "value": "DENY"
+        },
+        {
+          "key": "X-Content-Type-Options",
+          "value": "nosniff"
+        },
+        {
+          "key": "Referrer-Policy",
+          "value": "origin-when-cross-origin"
+        },
+        {
+          "key": "X-Enterprise-Security",
+          "value": "SOC2-Type-II-Compliant"
+        }
+      ]
+    }
+  ]
+}
