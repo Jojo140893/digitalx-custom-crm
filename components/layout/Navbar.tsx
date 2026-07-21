@@ -13,6 +13,7 @@ interface NavbarProps {
   onSwitchUser: (user: User) => void;
   onOpenSearch: () => void;
   onOpenMobileMenu: () => void;
+  onOpenSupabaseConfig: () => void;
 }
 
 export const Navbar: React.FC<NavbarProps> = ({
@@ -21,25 +22,14 @@ export const Navbar: React.FC<NavbarProps> = ({
   onSwitchUser,
   onOpenSearch,
   onOpenMobileMenu,
+  onOpenSupabaseConfig,
 }) => {
   const [showRoleMenu, setShowRoleMenu] = useState(false);
   const [showTenantMenu, setShowTenantMenu] = useState(false);
-  const [checkingSupabase, setCheckingSupabase] = useState(false);
 
   const isAdmin = currentUser.role === 'ADMIN';
   const currentCurrency = crmStore.getCurrency();
   const currentTenant = crmStore.getTenant();
-
-  const handleCheckSupabase = async () => {
-    setCheckingSupabase(true);
-    const health = await checkSupabaseHealth();
-    setCheckingSupabase(false);
-    if (health.status === 'CONNECTED') {
-      toast.success('Supabase Connected', health.message);
-    } else {
-      toast.info('Database Mode', health.message);
-    }
-  };
 
   const toggleCurrency = () => {
     const nextCurrency = currentCurrency === 'AUD' ? 'USD' : 'AUD';
@@ -62,7 +52,7 @@ export const Navbar: React.FC<NavbarProps> = ({
         {/* Global Search Button */}
         <button
           onClick={onOpenSearch}
-          className="flex items-center gap-3 px-3.5 py-2 rounded-xl bg-slate-100 hover:bg-slate-200/80 border border-slate-200 text-slate-500 hover:text-slate-800 transition-all max-w-md w-full text-xs font-medium"
+          className="flex items-center gap-3 px-3.5 py-2 rounded-xl bg-slate-100 hover:bg-slate-200/80 border border-slate-200 text-slate-600 hover:text-slate-900 transition-all max-w-md w-full text-xs font-semibold"
         >
           <Search className="w-4 h-4 text-indigo-600" />
           <span className="flex-1 text-left">Search leads, clients, projects, invoices...</span>
@@ -126,19 +116,18 @@ export const Navbar: React.FC<NavbarProps> = ({
           <span>SOC2 Type II • 99.99% SLA</span>
         </div>
 
-        {/* Supabase Indicator Pill */}
+        {/* Supabase Config Pill */}
         <button
-          onClick={handleCheckSupabase}
-          disabled={checkingSupabase}
-          title="Click to check database health"
-          className={`hidden md:flex items-center gap-1.5 px-3 py-1 rounded-full border text-[11px] font-semibold transition-all hover:scale-105 active:scale-95 ${
+          onClick={onOpenSupabaseConfig}
+          title="Click to open Supabase Settings & Cloud Sync Manager"
+          className={`hidden md:flex items-center gap-1.5 px-3 py-1.5 rounded-full border text-xs font-bold transition-all hover:scale-105 active:scale-95 shadow-2xs ${
             isSupabaseConfigured
-              ? 'bg-emerald-50 text-emerald-700 border-emerald-200 hover:bg-emerald-100'
-              : 'bg-indigo-50 text-indigo-700 border-indigo-200 hover:bg-indigo-100'
+              ? 'bg-emerald-50 text-emerald-800 border-emerald-300 hover:bg-emerald-100'
+              : 'bg-indigo-50 text-indigo-800 border-indigo-300 hover:bg-indigo-100'
           }`}
         >
-          <Database className={`w-3.5 h-3.5 ${checkingSupabase ? 'animate-spin' : ''}`} />
-          <span>{isSupabaseConfigured ? 'Supabase Connected' : 'Supabase Ready'}</span>
+          <Database className="w-3.5 h-3.5 text-indigo-600" />
+          <span>{isSupabaseConfigured ? 'Supabase Connected' : 'Supabase Cloud Sync'}</span>
         </button>
 
         {/* Role Switcher Pill */}
@@ -225,4 +214,3 @@ export const Navbar: React.FC<NavbarProps> = ({
     </header>
   );
 };
-

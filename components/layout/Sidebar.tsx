@@ -20,7 +20,6 @@ import {
   ShieldAlert,
   Timer,
   Building2,
-  ChevronRight,
 } from 'lucide-react';
 
 export type ModuleKey =
@@ -67,8 +66,8 @@ export const Sidebar: React.FC<SidebarProps> = ({
       label: 'EXECUTIVE & PIPELINE',
       items: [
         { key: 'dashboard', label: 'Command Dashboard', icon: LayoutDashboard },
-        { key: 'leads', label: 'Lead Pipeline', icon: UserPlus, badge: counts.leads, badgeColor: 'bg-indigo-500/20 text-indigo-300' },
-        { key: 'clients', label: 'Active Clients', icon: Users, badge: counts.activeClients, badgeColor: 'bg-emerald-500/20 text-emerald-300' },
+        { key: 'leads', label: 'Lead Pipeline', icon: UserPlus, badge: counts.leads, badgeColor: 'bg-indigo-100 text-indigo-800 border-indigo-200' },
+        { key: 'clients', label: 'Active Clients', icon: Users, badge: counts.activeClients, badgeColor: 'bg-emerald-100 text-emerald-800 border-emerald-200' },
         { key: 'churned-clients', label: 'Churned Archive', icon: UserX },
       ],
     },
@@ -76,14 +75,14 @@ export const Sidebar: React.FC<SidebarProps> = ({
       label: 'DELIVERY & OPERATIONS',
       items: [
         { key: 'projects', label: 'Client Projects', icon: Briefcase },
-        { key: 'pending-projects', label: 'Pending / Delayed', icon: Clock, badge: counts.pendingProjects > 0 ? counts.pendingProjects : undefined, badgeColor: 'bg-amber-500/20 text-amber-300' },
+        { key: 'pending-projects', label: 'Pending / Delayed', icon: Clock, badge: counts.pendingProjects > 0 ? counts.pendingProjects : undefined, badgeColor: 'bg-amber-100 text-amber-800 border-amber-200' },
         { key: 'completed-projects', label: 'Completed Builds', icon: CheckCircle2 },
       ],
     },
     {
       label: 'FINANCE & TEAM',
       items: [
-        { key: 'finance', label: 'Finance & Invoices', icon: DollarSign, badge: counts.overdueInvoices > 0 ? counts.overdueInvoices : undefined, badgeColor: 'bg-rose-500/20 text-rose-300' },
+        { key: 'finance', label: 'Finance & Invoices', icon: DollarSign, badge: counts.overdueInvoices > 0 ? counts.overdueInvoices : undefined, badgeColor: 'bg-rose-100 text-rose-800 border-rose-200' },
         { key: 'proposals', label: 'Proposals & Scope', icon: FileCheck },
         { key: 'employees', label: 'Staff Directory', icon: UserCheck },
         { key: 'employee-background', label: 'Employee Profiles', icon: FileText },
@@ -107,27 +106,27 @@ export const Sidebar: React.FC<SidebarProps> = ({
       {/* Mobile overlay */}
       {isOpenMobile && (
         <div
-          className="fixed inset-0 z-40 bg-slate-900/60 backdrop-blur-sm lg:hidden"
+          className="fixed inset-0 z-40 bg-slate-900/30 backdrop-blur-xs lg:hidden"
           onClick={onCloseMobile}
         />
       )}
 
       <aside
-        className={`fixed top-0 bottom-0 left-0 z-50 w-72 bg-[#0f172a] text-slate-300 border-r border-slate-800 flex flex-col transition-transform duration-300 ease-in-out ${
+        className={`fixed top-0 bottom-0 left-0 z-50 w-72 bg-white text-slate-700 border-r border-slate-200 flex flex-col transition-transform duration-300 ease-in-out shadow-xs ${
           isOpenMobile ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'
         }`}
       >
         {/* Header Branding */}
-        <div className="h-16 px-6 flex items-center justify-between border-b border-slate-800 bg-slate-950/40">
+        <div className="h-16 px-6 flex items-center justify-between border-b border-slate-200 bg-slate-50/80">
           <div className="flex items-center gap-3">
             <div className="w-9 h-9 rounded-xl bg-indigo-600 flex items-center justify-center text-white font-bold shadow-md shadow-indigo-600/30">
               <Building2 className="w-5 h-5" />
             </div>
             <div>
-              <h1 className="font-bold text-base text-white tracking-tight flex items-center gap-1.5">
-                DigitalX <span className="text-[10px] px-1.5 py-0.5 rounded bg-indigo-500/20 text-indigo-300 font-mono border border-indigo-500/30">Enterprise v4.2</span>
+              <h1 className="font-bold text-base text-slate-900 tracking-tight flex items-center gap-1.5">
+                DigitalX <span className="text-[10px] px-1.5 py-0.5 rounded bg-indigo-50 text-indigo-700 font-mono border border-indigo-200 font-semibold">Enterprise v4.2</span>
               </h1>
-              <p className="text-[11px] text-slate-400 font-medium">SOC2 Certified CRM Suite</p>
+              <p className="text-[11px] text-slate-500 font-medium">SOC2 Certified CRM Suite</p>
             </div>
           </div>
         </div>
@@ -136,7 +135,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
         <div className="flex-1 overflow-y-auto py-5 px-3 space-y-6">
           {menuGroups.map((group, idx) => (
             <div key={idx} className="space-y-1">
-              <h3 className="px-3 text-[10px] font-bold text-slate-400 tracking-widest uppercase">
+              <h3 className="px-3 text-[11px] font-bold text-slate-500 tracking-wider uppercase">
                 {group.label}
               </h3>
               <div className="space-y-0.5 mt-1">
@@ -153,16 +152,16 @@ export const Sidebar: React.FC<SidebarProps> = ({
                       className={`w-full flex items-center justify-between px-3 py-2.5 rounded-xl text-xs font-semibold transition-all duration-150 group ${
                         isActive
                           ? 'bg-indigo-600 text-white shadow-md shadow-indigo-600/20 font-bold'
-                          : 'text-slate-300 hover:text-white hover:bg-slate-800/60'
+                          : 'text-slate-700 hover:text-indigo-600 hover:bg-slate-100/80'
                       }`}
                     >
                       <div className="flex items-center gap-3">
                         <Icon
-                          className={`w-4 h-4 transition-colors ${
-                            isActive ? 'text-white' : 'text-slate-400 group-hover:text-slate-200'
+                          className={`w-4.5 h-4.5 transition-colors ${
+                            isActive ? 'text-white' : 'text-slate-500 group-hover:text-indigo-600'
                           }`}
                         />
-                        <span>{item.label}</span>
+                        <span className="text-xs font-bold">{item.label}</span>
                       </div>
 
                       {item.badge !== undefined && (
@@ -183,18 +182,17 @@ export const Sidebar: React.FC<SidebarProps> = ({
         </div>
 
         {/* Footer Organization Profile */}
-        <div className="p-4 border-t border-slate-800 bg-slate-950/40">
-          <div className="p-3 rounded-xl bg-slate-900/90 border border-slate-800 text-xs space-y-1">
-            <div className="flex items-center justify-between text-slate-200 font-semibold">
+        <div className="p-4 border-t border-slate-200 bg-slate-50/80">
+          <div className="p-3 rounded-xl bg-white border border-slate-200 text-xs space-y-1 shadow-2xs">
+            <div className="flex items-center justify-between text-slate-900 font-bold">
               <span>DigitalX Global Corp</span>
               <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" title="Systems Operational" />
             </div>
-            <p className="text-slate-400 text-[11px]">Sydney (syd1) • NYC (iad1)</p>
-            <p className="text-[10px] text-slate-500 font-mono pt-1 border-t border-slate-800/80">SLA: 99.99% • Latency: 14ms</p>
+            <p className="text-slate-500 text-[11px] font-medium">Sydney (syd1) • NYC (iad1)</p>
+            <p className="text-[10px] text-slate-500 font-mono pt-1 border-t border-slate-100">SLA: 99.99% • Latency: 14ms</p>
           </div>
         </div>
       </aside>
-
     </>
   );
 };

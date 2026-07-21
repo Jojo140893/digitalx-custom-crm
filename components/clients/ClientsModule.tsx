@@ -45,7 +45,8 @@ export const ClientsModule: React.FC<ClientsModuleProps> = ({
     (c) =>
       c.status === 'ACTIVE' &&
       (c.companyName.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        c.primaryContact.toLowerCase().includes(searchQuery.toLowerCase()))
+        c.primaryContact.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        c.vertical.toLowerCase().includes(searchQuery.toLowerCase()))
   );
 
   const totalMRR = activeClients.reduce((acc, c) => acc + c.monthlyRetainer, 0);
@@ -62,7 +63,7 @@ export const ClientsModule: React.FC<ClientsModuleProps> = ({
   return (
     <div className="space-y-6 pb-12">
       {/* Header Banner */}
-      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 crm-header-card p-6 rounded-2xl border border-slate-200">
+      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 crm-header-card p-6 rounded-2xl border border-slate-200 bg-white">
         <div>
           <div className="flex items-center gap-2 text-xs font-bold text-emerald-700 uppercase tracking-wider mb-1">
             <Users className="w-4 h-4 text-emerald-600" /> Active Client Portfolio
@@ -70,7 +71,7 @@ export const ClientsModule: React.FC<ClientsModuleProps> = ({
           <h2 className="text-2xl font-extrabold text-slate-900 tracking-tight">
             Client Account Directory
           </h2>
-          <p className="text-sm text-slate-500 mt-0.5">
+          <p className="text-sm text-slate-600 font-medium mt-0.5">
             Managing active agency retainers, onboarding checklists, & service deliverables
           </p>
         </div>
@@ -83,22 +84,31 @@ export const ClientsModule: React.FC<ClientsModuleProps> = ({
           <div className="h-8 w-px bg-slate-200" />
           <div>
             <p className="text-[10px] text-slate-500 uppercase font-bold">Combined MRR</p>
-            <p className="text-xl font-extrabold text-slate-900">{isAdmin ? `$${totalMRR.toLocaleString()}/mo` : '🔒 Masked'}</p>
+            <p className="text-xl font-extrabold text-slate-900">{isAdmin ? crmStore.formatCurrency(totalMRR) + '/mo' : '🔒 Masked'}</p>
           </div>
         </div>
       </div>
 
       {/* Search Bar */}
-      <div className="crm-card p-4 rounded-2xl flex items-center justify-between gap-4">
+      <div className="crm-card p-4 rounded-2xl flex items-center justify-between gap-4 bg-white border border-slate-200">
         <div className="flex-1 relative">
-          <Search className="w-4 h-4 text-slate-400 absolute left-3 top-3" />
+          <Search className="w-4 h-4 text-slate-400 absolute left-3.5 top-3" />
           <input
             type="text"
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            placeholder="Search active clients by company name or contact..."
-            className="w-full pl-9 pr-4 py-2 rounded-xl bg-slate-50 border border-slate-200 text-xs text-slate-900 focus:outline-none focus:border-indigo-600 font-medium"
+            placeholder="Search active clients by company name, contact, or vertical..."
+            className="w-full pl-10 pr-10 py-2 rounded-xl bg-slate-50 border border-slate-300 text-xs text-slate-900 focus:outline-none focus:border-indigo-600 font-semibold placeholder-slate-400"
           />
+          {searchQuery && (
+            <button
+              onClick={() => setSearchQuery('')}
+              className="absolute right-2.5 top-2.5 p-0.5 text-slate-400 hover:text-slate-700 hover:bg-slate-200 rounded"
+              title="Clear search input"
+            >
+              <X className="w-3.5 h-3.5" />
+            </button>
+          )}
         </div>
       </div>
 
@@ -112,7 +122,7 @@ export const ClientsModule: React.FC<ClientsModuleProps> = ({
           return (
             <div
               key={client.id}
-              className="crm-card crm-card-hover rounded-2xl p-6 flex flex-col justify-between space-y-4 group"
+              className="crm-card crm-card-hover rounded-2xl p-6 flex flex-col justify-between space-y-4 group bg-white border border-slate-200"
             >
               <div>
                 <div className="flex items-start justify-between gap-2 mb-2">
@@ -120,9 +130,9 @@ export const ClientsModule: React.FC<ClientsModuleProps> = ({
                     <h3 className="text-lg font-bold text-slate-900 group-hover:text-emerald-700 transition-colors">
                       {client.companyName}
                     </h3>
-                    <p className="text-xs text-slate-500">{client.primaryContact}</p>
+                    <p className="text-xs text-slate-600 font-medium">{client.primaryContact}</p>
                   </div>
-                  <span className="text-xs px-2 py-0.5 rounded font-mono font-bold bg-slate-100 text-slate-700 border border-slate-200">
+                  <span className="text-xs px-2 py-0.5 rounded font-mono font-bold bg-slate-100 text-slate-800 border border-slate-200">
                     {client.country === 'AU' ? '🇦🇺 AU' : '🇺🇸 US'}
                   </span>
                 </div>
@@ -132,27 +142,27 @@ export const ClientsModule: React.FC<ClientsModuleProps> = ({
                   <div>
                     <span className="text-[10px] text-slate-500 block font-bold">Setup Fee</span>
                     <span className="font-extrabold text-slate-900">
-                      {isAdmin ? `$${client.setupFee.toLocaleString()}` : '🔒'}
+                      {isAdmin ? crmStore.formatCurrency(client.setupFee) : '🔒'}
                     </span>
                   </div>
                   <div>
                     <span className="text-[10px] text-slate-500 block font-bold">Monthly Retainer</span>
                     <span className="font-extrabold text-emerald-700">
-                      {isAdmin ? `$${client.monthlyRetainer.toLocaleString()}/mo` : '🔒'}
+                      {isAdmin ? `${crmStore.formatCurrency(client.monthlyRetainer)}/mo` : '🔒'}
                     </span>
                   </div>
                 </div>
 
                 {/* Services Badges */}
                 <div className="space-y-1.5">
-                  <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block">
+                  <span className="text-[10px] font-bold text-slate-500 uppercase tracking-wider block">
                     Active Services Package
                   </span>
                   <div className="flex flex-wrap gap-1.5">
                     {client.servicesSold.map((s) => (
                       <span
                         key={s}
-                        className="text-[10px] px-2 py-0.5 rounded-md bg-indigo-50 text-indigo-700 border border-indigo-200 font-semibold"
+                        className="text-[10px] px-2 py-0.5 rounded-md bg-indigo-50 text-indigo-800 border border-indigo-200 font-bold"
                       >
                         {s}
                       </span>
@@ -163,7 +173,7 @@ export const ClientsModule: React.FC<ClientsModuleProps> = ({
                 {/* Onboarding Progress */}
                 <div className="mt-4 pt-3 border-t border-slate-100 space-y-1.5">
                   <div className="flex items-center justify-between text-xs">
-                    <span className="text-slate-600 flex items-center gap-1 text-[11px] font-semibold">
+                    <span className="text-slate-700 flex items-center gap-1 text-[11px] font-bold">
                       <CheckSquare className="w-3.5 h-3.5 text-emerald-600" /> Onboarding Checklist
                     </span>
                     <span className="text-slate-900 font-extrabold text-[11px]">
@@ -183,7 +193,7 @@ export const ClientsModule: React.FC<ClientsModuleProps> = ({
               <div className="pt-3 border-t border-slate-100 flex items-center justify-between">
                 <button
                   onClick={() => setSelectedClient(client)}
-                  className="px-3 py-1.5 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-800 text-xs font-bold transition-all"
+                  className="px-3.5 py-1.5 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-900 text-xs font-bold transition-all border border-slate-300"
                 >
                   Manage Checklist & Contact
                 </button>
@@ -202,12 +212,12 @@ export const ClientsModule: React.FC<ClientsModuleProps> = ({
 
       {/* CLIENT CHECKLIST MODAL */}
       {selectedClient && (
-        <div className="fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-xs flex items-center justify-center p-4">
-          <div className="w-full max-w-2xl bg-white border border-slate-200 rounded-2xl p-6 shadow-2xl space-y-5">
-            <div className="flex items-center justify-between pb-3 border-b border-slate-100">
+        <div className="fixed inset-0 z-50 bg-slate-900/40 backdrop-blur-xs flex items-center justify-center p-4">
+          <div className="w-full max-w-2xl bg-white border border-slate-200 rounded-3xl p-6 shadow-2xl space-y-5">
+            <div className="flex items-center justify-between pb-3 border-b border-slate-200">
               <div>
                 <h3 className="text-xl font-extrabold text-slate-900">{selectedClient.companyName}</h3>
-                <p className="text-xs text-slate-500">
+                <p className="text-xs text-slate-600 font-medium">
                   Contract Started: {selectedClient.contractStartDate} • {selectedClient.country}
                 </p>
               </div>
@@ -259,10 +269,10 @@ export const ClientsModule: React.FC<ClientsModuleProps> = ({
               </div>
             </div>
 
-            <div className="flex justify-end pt-3 border-t border-slate-100">
+            <div className="flex justify-end pt-3 border-t border-slate-200">
               <button
                 onClick={() => setSelectedClient(null)}
-                className="px-5 py-2 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white font-bold text-xs"
+                className="px-5 py-2 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white font-bold text-xs shadow-xs"
               >
                 Close View
               </button>
@@ -273,9 +283,9 @@ export const ClientsModule: React.FC<ClientsModuleProps> = ({
 
       {/* ARCHIVE MODAL */}
       {churningClient && (
-        <div className="fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-xs flex items-center justify-center p-4">
-          <div className="w-full max-w-md bg-white border border-slate-200 rounded-2xl p-6 shadow-2xl space-y-4">
-            <div className="flex items-center justify-between pb-3 border-b border-slate-100">
+        <div className="fixed inset-0 z-50 bg-slate-900/40 backdrop-blur-xs flex items-center justify-center p-4">
+          <div className="w-full max-w-md bg-white border border-slate-200 rounded-3xl p-6 shadow-2xl space-y-4">
+            <div className="flex items-center justify-between pb-3 border-b border-slate-200">
               <h3 className="text-base font-extrabold text-rose-700 flex items-center gap-2">
                 <Archive className="w-5 h-5" /> Archive Client &quot;{churningClient.companyName}&quot;
               </h3>
@@ -286,11 +296,11 @@ export const ClientsModule: React.FC<ClientsModuleProps> = ({
 
             <form onSubmit={handleChurnSubmit} className="space-y-4 text-xs font-medium">
               <div>
-                <label className="block text-slate-700 font-bold mb-1">Reason for Churn *</label>
+                <label className="block text-slate-800 font-bold mb-1">Reason for Churn *</label>
                 <select
                   value={churnReason}
                   onChange={(e) => setChurnReason(e.target.value)}
-                  className="w-full p-2.5 rounded-xl bg-slate-50 border border-slate-200 text-slate-900 focus:outline-none"
+                  className="w-full p-2.5 rounded-xl bg-slate-50 border border-slate-300 text-slate-900 font-semibold focus:outline-none"
                 >
                   <option value="Budget constraints">Budget constraints</option>
                   <option value="Acquired by national firm">Acquired by national firm</option>
@@ -300,20 +310,20 @@ export const ClientsModule: React.FC<ClientsModuleProps> = ({
               </div>
 
               <div>
-                <label className="block text-slate-700 font-bold mb-1">Reactivation Notes</label>
+                <label className="block text-slate-800 font-bold mb-1">Reactivation Notes</label>
                 <textarea
                   rows={3}
                   value={reactivationNotes}
                   onChange={(e) => setReactivationNotes(e.target.value)}
-                  className="w-full p-2.5 rounded-xl bg-slate-50 border border-slate-200 text-slate-900 focus:outline-none"
+                  className="w-full p-2.5 rounded-xl bg-slate-50 border border-slate-300 text-slate-900 font-medium focus:outline-none"
                 />
               </div>
 
-              <div className="flex justify-end gap-3 pt-3 border-t border-slate-100">
+              <div className="flex justify-end gap-3 pt-3 border-t border-slate-200">
                 <button
                   type="button"
                   onClick={() => setChurningClient(null)}
-                  className="px-4 py-2 rounded-xl bg-slate-100 text-slate-700 font-bold"
+                  className="px-4 py-2 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-800 font-bold border border-slate-300"
                 >
                   Cancel
                 </button>

@@ -1,11 +1,9 @@
 {
   "version": 2,
-  "name": "digitalx-enterprise-crm",
   "framework": "nextjs",
   "buildCommand": "next build",
   "devCommand": "next dev",
   "installCommand": "npm install",
-  "regions": ["syd1", "iad1"],
   "headers": [
     {
       "source": "/(.*)",

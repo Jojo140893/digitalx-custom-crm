@@ -4,6 +4,7 @@ import React, { useState, useEffect } from 'react';
 import { Sidebar, ModuleKey } from '@/components/layout/Sidebar';
 import { Navbar } from '@/components/layout/Navbar';
 import { GlobalSearchModal } from '@/components/search/GlobalSearchModal';
+import { SupabaseConfigModal } from '@/components/ui/SupabaseConfigModal';
 
 // Modules
 import { DashboardModule } from '@/components/dashboard/DashboardModule';
@@ -46,6 +47,7 @@ export default function CRMPage() {
   // Layout UI state
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [isSearchOpen, setIsSearchOpen] = useState(false);
+  const [isSupabaseConfigOpen, setIsSupabaseConfigOpen] = useState(false);
 
   const refreshState = () => {
     setCurrentUser(crmStore.getCurrentUser());
@@ -84,7 +86,7 @@ export default function CRMPage() {
   const isAdmin = currentUser.role === 'ADMIN';
 
   return (
-    <div className="min-h-screen bg-[#070a11] text-[#f8fafc] flex">
+    <div className="min-h-screen bg-[#f8fafc] text-[#0f172a] flex">
       {/* Sidebar */}
       <Sidebar
         currentModule={currentModule}
@@ -102,6 +104,7 @@ export default function CRMPage() {
           onSwitchUser={handleSwitchUser}
           onOpenSearch={() => setIsSearchOpen(true)}
           onOpenMobileMenu={() => setIsMobileMenuOpen(true)}
+          onOpenSupabaseConfig={() => setIsSupabaseConfigOpen(true)}
         />
 
         <main className="flex-1 px-4 lg:px-8 py-6 max-w-7xl mx-auto w-full">
@@ -222,6 +225,12 @@ export default function CRMPage() {
         invoices={invoices}
         users={allUsers}
         onSelectModule={setCurrentModule}
+      />
+
+      {/* Supabase Config & Cloud Sync Modal */}
+      <SupabaseConfigModal
+        isOpen={isSupabaseConfigOpen}
+        onClose={() => setIsSupabaseConfigOpen(false)}
       />
     </div>
   );

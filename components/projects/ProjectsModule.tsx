@@ -47,16 +47,17 @@ export const ProjectsModule: React.FC<ProjectsModuleProps> = ({
   });
 
   const statuses: { key: ProjectStatus; label: string; badgeClass: string }[] = [
-    { key: 'PENDING', label: 'Pending / Delayed', badgeClass: 'badge-amber' },
-    { key: 'IN_PROGRESS', label: 'In Progress', badgeClass: 'badge-indigo' },
-    { key: 'COMPLETED', label: 'Completed', badgeClass: 'badge-emerald' },
-    { key: 'ON_HOLD', label: 'On Hold', badgeClass: 'badge-slate' },
+    { key: 'PENDING', label: 'Pending / Delayed', badgeClass: 'bg-amber-100 text-amber-800 border-amber-200' },
+    { key: 'IN_PROGRESS', label: 'In Progress', badgeClass: 'bg-indigo-100 text-indigo-800 border-indigo-200' },
+    { key: 'COMPLETED', label: 'Completed', badgeClass: 'bg-emerald-100 text-emerald-800 border-emerald-200' },
+    { key: 'ON_HOLD', label: 'On Hold', badgeClass: 'bg-slate-100 text-slate-800 border-slate-200' },
   ];
 
   const filteredProjects = projects.filter((p) => {
     const matchesSearch =
       p.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      p.clientName.toLowerCase().includes(searchQuery.toLowerCase());
+      p.clientName.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      p.serviceType.toLowerCase().includes(searchQuery.toLowerCase());
     const matchesStatus = selectedStatus === 'ALL' || p.status === selectedStatus;
     return matchesSearch && matchesStatus;
   });
@@ -76,33 +77,33 @@ export const ProjectsModule: React.FC<ProjectsModuleProps> = ({
   return (
     <div className="space-y-6 pb-12">
       {/* Header */}
-      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 bg-white p-6 rounded-xl border border-slate-200 shadow-sm">
+      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 bg-white p-6 rounded-2xl border border-slate-200 shadow-xs">
         <div>
-          <div className="flex items-center gap-2 text-xs font-semibold text-indigo-600 uppercase tracking-wider mb-1">
-            <Briefcase className="w-4 h-4" /> Client Deliverables & Projects
+          <div className="flex items-center gap-2 text-xs font-bold text-indigo-700 uppercase tracking-wider mb-1">
+            <Briefcase className="w-4 h-4 text-indigo-600" /> Client Deliverables & Projects
           </div>
-          <h2 className="text-2xl font-bold text-slate-900 tracking-tight">
+          <h2 className="text-2xl font-extrabold text-slate-900 tracking-tight">
             Project Command Board
           </h2>
-          <p className="text-sm text-slate-500 mt-1">
+          <p className="text-sm text-slate-600 font-medium mt-0.5">
             Orchestrating technical builds, milestones, assignees, & delivery timelines
           </p>
         </div>
 
         <div className="flex items-center gap-3">
-          <div className="flex items-center p-1 rounded-lg bg-slate-100 border border-slate-200 text-xs font-semibold">
+          <div className="flex items-center p-1 rounded-xl bg-slate-100 border border-slate-200 text-xs font-bold">
             <button
               onClick={() => setViewMode('kanban')}
-              className={`flex items-center gap-1.5 px-3 py-1.5 rounded-md transition-all ${
-                viewMode === 'kanban' ? 'bg-white text-indigo-600 shadow-sm font-bold' : 'text-slate-600 hover:text-slate-900'
+              className={`flex items-center gap-1.5 px-3.5 py-1.5 rounded-lg transition-all ${
+                viewMode === 'kanban' ? 'bg-indigo-600 text-white shadow-xs font-bold' : 'text-slate-700 hover:text-slate-900'
               }`}
             >
               <LayoutGrid className="w-3.5 h-3.5" /> Board View
             </button>
             <button
               onClick={() => setViewMode('table')}
-              className={`flex items-center gap-1.5 px-3 py-1.5 rounded-md transition-all ${
-                viewMode === 'table' ? 'bg-white text-indigo-600 shadow-sm font-bold' : 'text-slate-600 hover:text-slate-900'
+              className={`flex items-center gap-1.5 px-3.5 py-1.5 rounded-lg transition-all ${
+                viewMode === 'table' ? 'bg-indigo-600 text-white shadow-xs font-bold' : 'text-slate-700 hover:text-slate-900'
               }`}
             >
               <List className="w-3.5 h-3.5" /> List View
@@ -111,7 +112,7 @@ export const ProjectsModule: React.FC<ProjectsModuleProps> = ({
 
           <button
             onClick={() => setShowAddModal(true)}
-            className="px-4 py-2 rounded-lg bg-indigo-600 hover:bg-indigo-700 text-white font-semibold text-xs flex items-center gap-2 shadow-sm transition-colors"
+            className="px-4 py-2.5 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white font-bold text-xs flex items-center gap-2 shadow-sm transition-colors"
           >
             <Plus className="w-4 h-4" /> New Project
           </button>
@@ -119,22 +120,31 @@ export const ProjectsModule: React.FC<ProjectsModuleProps> = ({
       </div>
 
       {/* Filter Bar */}
-      <div className="bg-white p-4 rounded-xl border border-slate-200 shadow-sm flex items-center gap-3">
+      <div className="bg-white p-4 rounded-2xl border border-slate-200 shadow-xs flex items-center gap-3">
         <div className="flex-1 relative">
-          <Search className="w-4 h-4 text-slate-400 absolute left-3 top-2.5" />
+          <Search className="w-4 h-4 text-slate-400 absolute left-3.5 top-3" />
           <input
             type="text"
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            placeholder="Search projects by name or client..."
-            className="w-full pl-9 pr-4 py-2 rounded-lg bg-slate-50 border border-slate-200 text-xs text-slate-900 focus:outline-none focus:ring-2 focus:ring-indigo-500"
+            placeholder="Search projects by name, client, or service type..."
+            className="w-full pl-10 pr-10 py-2 rounded-xl bg-slate-50 border border-slate-300 text-xs text-slate-900 focus:outline-none focus:border-indigo-600 font-semibold placeholder-slate-400"
           />
+          {searchQuery && (
+            <button
+              onClick={() => setSearchQuery('')}
+              className="absolute right-2.5 top-2.5 p-0.5 text-slate-400 hover:text-slate-700 hover:bg-slate-200 rounded"
+              title="Clear search filter"
+            >
+              <X className="w-3.5 h-3.5" />
+            </button>
+          )}
         </div>
 
         <select
           value={selectedStatus}
           onChange={(e) => setSelectedStatus(e.target.value)}
-          className="px-3 py-2 rounded-lg bg-slate-50 border border-slate-200 text-xs text-slate-700 font-medium focus:outline-none"
+          className="px-3 py-2 rounded-xl bg-slate-50 border border-slate-300 text-xs text-slate-800 font-bold focus:outline-none focus:border-indigo-600"
         >
           <option value="ALL">All Project Statuses</option>
           {statuses.map((s) => (
@@ -151,13 +161,13 @@ export const ProjectsModule: React.FC<ProjectsModuleProps> = ({
             return (
               <div
                 key={col.key}
-                className="w-80 shrink-0 bg-slate-100/70 border border-slate-200 rounded-xl p-3 flex flex-col max-h-[75vh]"
+                className="w-80 shrink-0 bg-slate-100/70 border border-slate-200 rounded-2xl p-3 flex flex-col max-h-[75vh]"
               >
                 <div className="flex items-center justify-between pb-3 mb-3 border-b border-slate-200">
-                  <span className={col.badgeClass}>
+                  <span className={`text-xs px-2.5 py-1 rounded-full font-bold border ${col.badgeClass}`}>
                     {col.label}
                   </span>
-                  <span className="text-xs font-bold text-slate-600 bg-white border border-slate-200 px-2 py-0.5 rounded-full">
+                  <span className="text-xs font-bold text-slate-700 bg-white border border-slate-200 px-2 py-0.5 rounded-full">
                     {colProjects.length}
                   </span>
                 </div>
@@ -166,38 +176,38 @@ export const ProjectsModule: React.FC<ProjectsModuleProps> = ({
                   {colProjects.map((proj) => (
                     <div
                       key={proj.id}
-                      className="p-4 rounded-xl bg-white hover:bg-slate-50 border border-slate-200 hover:border-indigo-300 transition-all space-y-3 shadow-sm group"
+                      className="p-4 rounded-xl bg-white hover:bg-slate-50 border border-slate-200 hover:border-indigo-300 transition-all space-y-3 shadow-xs group"
                     >
                       <div className="flex items-start justify-between gap-2">
                         <div>
-                          <span className="badge-indigo mb-1 inline-block">
+                          <span className="px-2 py-0.5 rounded-md bg-indigo-50 text-indigo-800 border border-indigo-200 text-[10px] font-bold mb-1.5 inline-block">
                             {proj.serviceType}
                           </span>
                           <h4 className="text-sm font-bold text-slate-900 group-hover:text-indigo-600 transition-colors">
                             {proj.name}
                           </h4>
-                          <p className="text-xs text-slate-500">{proj.clientName}</p>
+                          <p className="text-xs text-slate-600 font-medium">{proj.clientName}</p>
                         </div>
                       </div>
 
                       {/* Blocker Notes if any */}
                       {proj.blockerNotes && (
-                        <div className="p-2.5 rounded-lg bg-amber-50 border border-amber-200 text-[11px] text-amber-800 flex items-start gap-1.5 font-medium">
+                        <div className="p-2.5 rounded-lg bg-amber-50 border border-amber-200 text-xs text-amber-900 flex items-start gap-1.5 font-bold">
                           <AlertTriangle className="w-3.5 h-3.5 text-amber-600 shrink-0 mt-0.5" />
                           <span>Blocker: {proj.blockerNotes}</span>
                         </div>
                       )}
 
                       {/* Delivery Date */}
-                      <div className="flex items-center justify-between text-xs text-slate-500 pt-1">
-                        <span className="flex items-center gap-1 text-[11px] font-medium">
-                          <Calendar className="w-3.5 h-3.5 text-indigo-500" /> Target: {proj.targetDelivery}
+                      <div className="flex items-center justify-between text-xs text-slate-600 pt-1">
+                        <span className="flex items-center gap-1 text-[11px] font-semibold">
+                          <Calendar className="w-3.5 h-3.5 text-indigo-600" /> Target: {proj.targetDelivery}
                         </span>
                       </div>
 
                       {/* Status Selector */}
-                      <div className="pt-2 border-t border-slate-100 flex items-center justify-between text-[11px]">
-                        <span className="text-slate-500 text-[10px] font-medium">
+                      <div className="pt-2 border-t border-slate-100 flex items-center justify-between text-xs">
+                        <span className="text-slate-600 text-[11px] font-bold">
                           {proj.assignees.join(', ')}
                         </span>
                         <select
@@ -206,7 +216,7 @@ export const ProjectsModule: React.FC<ProjectsModuleProps> = ({
                             crmStore.updateProjectStatus(proj.id, e.target.value as ProjectStatus);
                             onRefresh();
                           }}
-                          className="bg-slate-50 text-slate-700 text-[10px] font-semibold px-2 py-0.5 rounded border border-slate-200 focus:outline-none"
+                          className="bg-slate-50 text-slate-800 text-xs font-bold px-2 py-0.5 rounded border border-slate-300 focus:outline-none"
                         >
                           {statuses.map((s) => (
                             <option key={s.key} value={s.key}>{s.label}</option>
@@ -224,10 +234,10 @@ export const ProjectsModule: React.FC<ProjectsModuleProps> = ({
 
       {/* TABLE VIEW */}
       {viewMode === 'table' && (
-        <div className="bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden">
+        <div className="bg-white rounded-2xl border border-slate-200 shadow-xs overflow-hidden">
           <div className="overflow-x-auto">
-            <table className="w-full text-left text-xs text-slate-700">
-              <thead className="bg-slate-50 text-slate-500 uppercase font-semibold text-[10px] tracking-wider border-b border-slate-200">
+            <table className="w-full text-left text-xs text-slate-800">
+              <thead className="bg-slate-100 text-slate-700 uppercase font-bold text-[11px] tracking-wider border-b border-slate-200">
                 <tr>
                   <th className="p-4">Project & Client</th>
                   <th className="p-4">Service Category</th>
@@ -240,15 +250,15 @@ export const ProjectsModule: React.FC<ProjectsModuleProps> = ({
               <tbody className="divide-y divide-slate-200">
                 {filteredProjects.map((p) => (
                   <tr key={p.id} className="hover:bg-slate-50 transition-colors">
-                    <td className="p-4 font-medium">
-                      <p className="text-slate-900 font-bold">{p.name}</p>
-                      <p className="text-slate-500 text-[11px]">{p.clientName}</p>
+                    <td className="p-4 font-bold">
+                      <p className="text-slate-900 text-sm">{p.name}</p>
+                      <p className="text-slate-600 text-xs font-medium">{p.clientName}</p>
                     </td>
-                    <td className="p-4 font-semibold text-indigo-600">{p.serviceType}</td>
-                    <td className="p-4 text-slate-600 font-mono text-[11px]">{p.targetDelivery}</td>
-                    <td className="p-4 text-slate-700">{p.assignees.join(', ')}</td>
+                    <td className="p-4 font-extrabold text-indigo-700">{p.serviceType}</td>
+                    <td className="p-4 text-slate-700 font-mono text-xs font-semibold">{p.targetDelivery}</td>
+                    <td className="p-4 text-slate-800 font-medium">{p.assignees.join(', ')}</td>
                     <td className="p-4">
-                      <span className={statuses.find((s) => s.key === p.status)?.badgeClass || 'badge-slate'}>
+                      <span className={`px-2.5 py-1 rounded-full text-xs font-bold border ${statuses.find((s) => s.key === p.status)?.badgeClass}`}>
                         {p.status}
                       </span>
                     </td>
@@ -259,7 +269,7 @@ export const ProjectsModule: React.FC<ProjectsModuleProps> = ({
                           crmStore.updateProjectStatus(p.id, e.target.value as ProjectStatus);
                           onRefresh();
                         }}
-                        className="bg-slate-50 text-slate-700 text-xs px-2 py-1 rounded border border-slate-200 font-medium"
+                        className="bg-slate-50 text-slate-800 text-xs px-2.5 py-1 rounded-lg border border-slate-300 font-bold"
                       >
                         {statuses.map((s) => (
                           <option key={s.key} value={s.key}>{s.label}</option>
@@ -276,10 +286,10 @@ export const ProjectsModule: React.FC<ProjectsModuleProps> = ({
 
       {/* NEW PROJECT MODAL */}
       {showAddModal && (
-        <div className="fixed inset-0 z-50 bg-slate-900/50 backdrop-blur-xs flex items-center justify-center p-4">
-          <div className="w-full max-w-md bg-white border border-slate-200 rounded-xl p-6 shadow-xl space-y-4">
+        <div className="fixed inset-0 z-50 bg-slate-900/40 backdrop-blur-xs flex items-center justify-center p-4">
+          <div className="w-full max-w-md bg-white border border-slate-200 rounded-3xl p-6 shadow-2xl space-y-4">
             <div className="flex items-center justify-between pb-3 border-b border-slate-200">
-              <h3 className="text-lg font-bold text-slate-900 flex items-center gap-2">
+              <h3 className="text-lg font-extrabold text-slate-900 flex items-center gap-2">
                 <Plus className="w-5 h-5 text-indigo-600" /> Create New Client Project
               </h3>
               <button onClick={() => setShowAddModal(false)} className="text-slate-400 hover:text-slate-600">
@@ -287,13 +297,13 @@ export const ProjectsModule: React.FC<ProjectsModuleProps> = ({
               </button>
             </div>
 
-            <form onSubmit={handleCreateProject} className="space-y-4 text-xs">
+            <form onSubmit={handleCreateProject} className="space-y-4 text-xs font-medium">
               <div>
-                <label className="block text-slate-700 font-medium mb-1">Select Client *</label>
+                <label className="block text-slate-800 font-bold mb-1">Select Client *</label>
                 <select
                   value={newProject.clientId}
                   onChange={(e) => setNewProject({ ...newProject, clientId: e.target.value })}
-                  className="w-full p-2.5 rounded-lg bg-slate-50 border border-slate-200 text-slate-900 focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                  className="w-full p-2.5 rounded-xl bg-slate-50 border border-slate-300 text-slate-900 font-semibold focus:outline-none focus:border-indigo-600"
                 >
                   {clients.map((c) => (
                     <option key={c.id} value={c.id}>{c.companyName}</option>
@@ -302,24 +312,24 @@ export const ProjectsModule: React.FC<ProjectsModuleProps> = ({
               </div>
 
               <div>
-                <label className="block text-slate-700 font-medium mb-1">Project Name *</label>
+                <label className="block text-slate-800 font-bold mb-1">Project Name *</label>
                 <input
                   type="text"
                   required
                   value={newProject.name}
                   onChange={(e) => setNewProject({ ...newProject, name: e.target.value })}
                   placeholder="e.g. AI Voice Receptionist Setup"
-                  className="w-full p-2.5 rounded-lg bg-slate-50 border border-slate-200 text-slate-900 focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                  className="w-full p-2.5 rounded-xl bg-slate-50 border border-slate-300 text-slate-900 font-semibold focus:outline-none focus:border-indigo-600"
                 />
               </div>
 
               <div className="grid grid-cols-2 gap-4">
                 <div>
-                  <label className="block text-slate-700 font-medium mb-1">Service Category</label>
+                  <label className="block text-slate-800 font-bold mb-1">Service Category</label>
                   <select
                     value={newProject.serviceType}
                     onChange={(e) => setNewProject({ ...newProject, serviceType: e.target.value as ServiceType })}
-                    className="w-full p-2.5 rounded-lg bg-slate-50 border border-slate-200 text-slate-900 focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                    className="w-full p-2.5 rounded-xl bg-slate-50 border border-slate-300 text-slate-900 font-semibold focus:outline-none focus:border-indigo-600"
                   >
                     <option value="AI Voice Agents">AI Voice Agents</option>
                     <option value="GoHighLevel Setup">GoHighLevel Setup</option>
@@ -330,12 +340,12 @@ export const ProjectsModule: React.FC<ProjectsModuleProps> = ({
                   </select>
                 </div>
                 <div>
-                  <label className="block text-slate-700 font-medium mb-1">Target Delivery</label>
+                  <label className="block text-slate-800 font-bold mb-1">Target Delivery</label>
                   <input
                     type="date"
                     value={newProject.targetDelivery}
                     onChange={(e) => setNewProject({ ...newProject, targetDelivery: e.target.value })}
-                    className="w-full p-2.5 rounded-lg bg-slate-50 border border-slate-200 text-slate-900 focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                    className="w-full p-2.5 rounded-xl bg-slate-50 border border-slate-300 text-slate-900 font-semibold focus:outline-none focus:border-indigo-600"
                   />
                 </div>
               </div>
@@ -344,13 +354,13 @@ export const ProjectsModule: React.FC<ProjectsModuleProps> = ({
                 <button
                   type="button"
                   onClick={() => setShowAddModal(false)}
-                  className="px-4 py-2 rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-700 font-semibold"
+                  className="px-4 py-2 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-800 font-bold border border-slate-300"
                 >
                   Cancel
                 </button>
                 <button
                   type="submit"
-                  className="px-5 py-2 rounded-lg bg-indigo-600 hover:bg-indigo-700 text-white font-bold shadow-sm transition-colors"
+                  className="px-5 py-2 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white font-bold shadow-sm transition-colors"
                 >
                   Save Project
                 </button>
@@ -362,4 +372,3 @@ export const ProjectsModule: React.FC<ProjectsModuleProps> = ({
     </div>
   );
 };
-
