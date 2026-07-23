@@ -1,7 +1,7 @@
 'use client';
 
 import React from 'react';
-import { UserX, RefreshCw, Calendar, DollarSign, FileText, AlertCircle } from 'lucide-react';
+import { UserX, RefreshCw, Calendar, DollarSign, FileText, AlertCircle, Lock } from 'lucide-react';
 import { Client } from '@/lib/types';
 import { crmStore } from '@/lib/store';
 
@@ -52,7 +52,7 @@ export const ChurnedClientsModule: React.FC<ChurnedClientsModuleProps> = ({
           <div className="h-8 w-px bg-slate-200" />
           <div>
             <p className="text-[10px] text-slate-500 uppercase font-bold tracking-wider">Total Past Revenue</p>
-            <p className="text-xl font-bold text-slate-900">{isAdmin ? `$${totalLifetimeRevenue.toLocaleString()}` : '🔒 Masked'}</p>
+            <p className="text-xl font-bold text-slate-900">{isAdmin ? `$${totalLifetimeRevenue.toLocaleString()}` : <span className="inline-flex items-center gap-1 text-slate-400 font-normal"><Lock className="w-4 h-4" /> Masked</span>}</p>
           </div>
         </div>
       </div>
@@ -93,7 +93,7 @@ export const ChurnedClientsModule: React.FC<ChurnedClientsModuleProps> = ({
                     </span>
                   </td>
                   <td className="p-4 font-bold text-emerald-700">
-                    {isAdmin ? `$${client.lifetimeRevenue.toLocaleString()}` : '🔒'}
+                    {isAdmin ? `$${client.lifetimeRevenue.toLocaleString()}` : <Lock className="w-3.5 h-3.5 text-slate-400 inline" />}
                   </td>
                   <td className="p-4 text-slate-500 max-w-xs truncate italic">
                     &quot;{client.reactivationNotes || 'No notes'}&quot;

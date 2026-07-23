@@ -321,7 +321,7 @@ class CRMStore {
     }
 
     this.logAudit('LEAD_CONVERTED', 'Client', newClient.id, `Converted lead ${lead.company} to Active Client ($${monthlyRetainer}/mo)`);
-    toast.success(`🎉 Lead Converted to Client!`, `${lead.company} is now Active ($${monthlyRetainer.toLocaleString()}/mo retainer)`);
+    toast.success(`Lead Converted to Client!`, `${lead.company} is now Active ($${monthlyRetainer.toLocaleString()}/mo retainer)`);
     syncToSupabase('clients', newClient);
     this.notify();
     return newClient;

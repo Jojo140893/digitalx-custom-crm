@@ -4,7 +4,7 @@ A production-grade, custom B2B SaaS CRM platform designed specifically for **Dig
 
 ---
 
-## ⚡ Quick Start
+## Quick Start
 
 ```bash
 # 1. Install dependencies
@@ -19,7 +19,7 @@ http://localhost:3000
 
 ---
 
-## 🏢 Business & Agency Context
+## Business & Agency Context
 
 DigitalX Solutions operates in Sydney, Australia, with client accounts across Australia (Sydney, Melbourne, Brisbane) and the USA (Los Angeles, Austin, Seattle). Deals typically combine a **one-off setup fee** with a **monthly recurring retainer**.
 
@@ -29,7 +29,7 @@ The CRM supports two distinct user personas via an interactive header role switc
 
 ---
 
-## 🚀 Included Modules & System Overview
+## Included Modules & System Overview
 
 1. **Command Centre Dashboard**: 6 KPI cards, revenue & MRR trend line chart, leads by source donut chart, vertical distribution bar chart, conversion funnel, team activity stream.
 2. **Lead Acquisition Pipeline**: Kanban pipeline & Data Table views, lead scoring, vertical & country flags (AU/US), follow-up reminders, and 1-click **"Convert Lead to Client"** workflow.
@@ -54,7 +54,7 @@ The CRM supports two distinct user personas via an interactive header role switc
 
 ---
 
-## 📡 Webhook Integration API Endpoints
+## Webhook Integration API Endpoints
 
 DigitalX CRM exposes ready REST API endpoints for external integrations:
 
@@ -67,7 +67,7 @@ Sending a POST JSON payload to any of these endpoints automatically ingests the 
 
 ---
 
-## 🛠 Tech Stack
+## Tech Stack
 
 - **Framework**: Next.js 14 (App Router)
 - **Language**: TypeScript

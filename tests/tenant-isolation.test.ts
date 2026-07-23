@@ -11,7 +11,7 @@ import { Client, TimeLog, Lead } from '../lib/types';
  */
 
 function runTenantIsolationTests() {
-  console.log('🧪 Starting Tenant Isolation & Verification Tests...');
+  console.log('Starting Tenant Isolation & Verification Tests...');
 
   // Test 1: Secret Encryption & Decryption
   const rawApiKey = 'sk_live_apollo_992014881023910';
@@ -19,24 +19,24 @@ function runTenantIsolationTests() {
   const decrypted = decryptSecret(encrypted);
 
   if (encrypted === rawApiKey) {
-    throw new Error('❌ TEST FAILED: Secret was not encrypted!');
+    throw new Error('TEST FAILED: Secret was not encrypted!');
   }
   if (decrypted !== rawApiKey) {
-    throw new Error('❌ TEST FAILED: Secret decryption failed!');
+    throw new Error('TEST FAILED: Secret decryption failed!');
   }
-  console.log('✅ TEST PASSED: Encrypted Secret Storage Verified (AES-256 equivalent)');
+  console.log('TEST PASSED: Encrypted Secret Storage Verified (AES-256 equivalent)');
 
   // Test 2: Cross-Tenant Data Scoping Rule
   const tenantA = DEFAULT_TENANT;
   const tenantB = MOCK_TENANTS[1];
 
   if (tenantA.id === tenantB.id) {
-    throw new Error('❌ TEST FAILED: Tenant IDs must be distinct!');
+    throw new Error('TEST FAILED: Tenant IDs must be distinct!');
   }
   if (tenantA.widgetKey === tenantB.widgetKey) {
-    throw new Error('❌ TEST FAILED: Widget Keys must be distinct per tenant!');
+    throw new Error('TEST FAILED: Widget Keys must be distinct per tenant!');
   }
-  console.log('✅ TEST PASSED: Multi-Tenant Data Scoping & Public Keys Isolated');
+  console.log('TEST PASSED: Multi-Tenant Data Scoping & Public Keys Isolated');
 
   // Test 3: Deterministic Margin Analyst Math
   const testClient: Client = {
@@ -76,12 +76,12 @@ function runTenantIsolationTests() {
   const margin = analyzeClientMargin(testClient, testLogs, 75);
 
   if (!margin.isUnderMargin) {
-    throw new Error(`❌ TEST FAILED: Expected client to be flagged under-margin, got margin=${margin.marginPercent}%`);
+    throw new Error(`TEST FAILED: Expected client to be flagged under-margin, got margin=${margin.marginPercent}%`);
   }
   if (margin.suggestedRetainer <= testClient.monthlyRetainer) {
-    throw new Error('❌ TEST FAILED: Suggested retainer must be higher than current retainer for under-margin account');
+    throw new Error('TEST FAILED: Suggested retainer must be higher than current retainer for under-margin account');
   }
-  console.log(`✅ TEST PASSED: Deterministic Margin Analyst correctly flagged ${margin.marginPercent}% margin (Suggested Retainer: $${margin.suggestedRetainer}/mo)`);
+  console.log(`TEST PASSED: Deterministic Margin Analyst correctly flagged ${margin.marginPercent}% margin (Suggested Retainer: $${margin.suggestedRetainer}/mo)`);
 
   // Test 4: Lead Scoring Engine
   const testLead: Lead = {
@@ -105,11 +105,11 @@ function runTenantIsolationTests() {
 
   const leadResult = predictLeadScore(testLead);
   if (leadResult.score < 75) {
-    throw new Error(`❌ TEST FAILED: Qualified GHL Home Services lead should score >= 75, got ${leadResult.score}`);
+    throw new Error(`TEST FAILED: Qualified GHL Home Services lead should score >= 75, got ${leadResult.score}`);
   }
-  console.log(`✅ TEST PASSED: Lead Scoring Engine generated Score=${leadResult.score} with Next Best Action: "${leadResult.nextBestAction}"`);
+  console.log(`TEST PASSED: Lead Scoring Engine generated Score=${leadResult.score} with Next Best Action: "${leadResult.nextBestAction}"`);
 
-  console.log('🎉 ALL STEP 0 TENANT & MATH VERIFICATION TESTS PASSED!');
+  console.log('ALL STEP 0 TENANT & MATH VERIFICATION TESTS PASSED!');
 }
 
 runTenantIsolationTests();

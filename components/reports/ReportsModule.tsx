@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState } from 'react';
-import { BarChart3, FileSpreadsheet, Download, Filter, Calendar, Globe, Building2 } from 'lucide-react';
+import { BarChart3, FileSpreadsheet, Download, Filter, Calendar, Globe, Building2, Lock } from 'lucide-react';
 import { Lead, Client, Invoice } from '@/lib/types';
 
 interface ReportsModuleProps {
@@ -86,8 +86,8 @@ export const ReportsModule: React.FC<ReportsModuleProps> = ({
             className="px-3 py-2 rounded-xl bg-slate-900 border border-slate-800 text-xs text-slate-200 focus:outline-none"
           >
             <option value="ALL">All Regions (AU & US)</option>
-            <option value="AU">Australia (AU 🇦🇺)</option>
-            <option value="US">United States (US 🇺🇸)</option>
+            <option value="AU">Australia (AU)</option>
+            <option value="US">United States (US)</option>
           </select>
         </div>
 
@@ -123,7 +123,7 @@ export const ReportsModule: React.FC<ReportsModuleProps> = ({
 
         <div className="p-5 rounded-2xl glass-card border border-slate-800 space-y-1">
           <span className="text-xs font-semibold text-slate-400">Filtered Segment MRR</span>
-          <p className="text-2xl font-black text-white">{isAdmin ? `$${totalMRR.toLocaleString()}/mo` : '🔒 Masked'}</p>
+          <p className="text-2xl font-black text-white">{isAdmin ? `$${totalMRR.toLocaleString()}/mo` : <span className="inline-flex items-center gap-1 text-slate-400 font-normal"><Lock className="w-4 h-4" /> Masked</span>}</p>
         </div>
       </div>
 
@@ -149,7 +149,7 @@ export const ReportsModule: React.FC<ReportsModuleProps> = ({
                   <td className="p-4 font-bold text-emerald-400">Active Client</td>
                   <td className="p-4 font-bold text-slate-100">{c.companyName}</td>
                   <td className="p-4 text-slate-300">{c.vertical}</td>
-                  <td className="p-4">{c.country === 'AU' ? '🇦🇺 AU' : '🇺🇸 US'}</td>
+                  <td className="p-4">{c.country === 'AU' ? 'AU' : 'US'}</td>
                   <td className="p-4 font-semibold text-emerald-400">{c.status}</td>
                 </tr>
               ))}
@@ -158,7 +158,7 @@ export const ReportsModule: React.FC<ReportsModuleProps> = ({
                   <td className="p-4 font-bold text-blue-400">Prospect Lead</td>
                   <td className="p-4 font-bold text-slate-100">{l.company}</td>
                   <td className="p-4 text-slate-300">{l.vertical}</td>
-                  <td className="p-4">{l.country === 'AU' ? '🇦🇺 AU' : '🇺🇸 US'}</td>
+                  <td className="p-4">{l.country === 'AU' ? 'AU' : 'US'}</td>
                   <td className="p-4 font-semibold text-blue-400">{l.status}</td>
                 </tr>
               ))}

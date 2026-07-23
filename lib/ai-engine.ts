@@ -94,7 +94,7 @@ export function analyzeClientMargin(
 
   let recommendation = `Account is performing healthy at ${marginPercent}% margin.`;
   if (isUnderMargin) {
-    recommendation = `⚠️ CRITICAL: Client is operating at ${marginPercent}% margin (${totalHours}h logged this month = $${totalCost} cost vs $${retainer} retainer). Recommend repricing retainer to $${suggestedRetainer.toLocaleString()}/mo.`;
+    recommendation = `CRITICAL: Client is operating at ${marginPercent}% margin (${totalHours}h logged this month = $${totalCost} cost vs $${retainer} retainer). Recommend repricing retainer to $${suggestedRetainer.toLocaleString()}/mo.`;
   }
 
   return {
@@ -147,7 +147,7 @@ export function predictLeadScore(lead: Lead): LeadScoreResult {
   } else if (lead.status === 'PROPOSAL_SENT') {
     nextBestAction = `Follow up with ${lead.name} on e-signature & setup invoice payment.`;
   } else if (score >= 75) {
-    nextBestAction = `🔥 High-priority lead: Schedule discovery call today.`;
+    nextBestAction = `High-priority lead: Schedule discovery call today.`;
   }
 
   // Meter usage (routed to light model)

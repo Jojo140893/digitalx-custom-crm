@@ -13,6 +13,7 @@ import {
   Building2,
   Calendar,
   Send,
+  X,
 } from 'lucide-react';
 import { crmStore } from '@/lib/store';
 import { Tenant } from '@/lib/types';
@@ -65,7 +66,7 @@ export const BillingModule: React.FC = () => {
       followUpDate: new Date(Date.now() + 86400000).toISOString().split('T')[0],
     });
 
-    toast.success('🎉 Demo Request Submitted!', `Thank you ${demoName}, our enterprise onboarding team will reach out within 2 hours.`);
+    toast.success('Demo Request Submitted!', `Thank you ${demoName}, our enterprise onboarding team will reach out within 2 hours.`);
     setIsDemoModalOpen(false);
     setDemoName('');
     setDemoEmail('');
@@ -302,7 +303,9 @@ export const BillingModule: React.FC = () => {
               <h3 className="font-extrabold text-base text-slate-900 flex items-center gap-2">
                 <Calendar className="w-5 h-5 text-indigo-600" /> Request Access & Book a Demo
               </h3>
-              <button onClick={() => setIsDemoModalOpen(false)} className="text-slate-400 hover:text-slate-600 font-bold">✕</button>
+              <button onClick={() => setIsDemoModalOpen(false)} className="text-slate-400 hover:text-slate-600 transition-colors p-1" aria-label="Close">
+                <X className="w-5 h-5" />
+              </button>
             </div>
 
             <form onSubmit={handleRequestDemoSubmit} className="space-y-3 text-xs">

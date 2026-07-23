@@ -198,7 +198,7 @@ export const ClientPortalModule: React.FC = () => {
                   <span className="font-bold text-slate-900 block">{prop.title}</span>
                   <div className="flex items-center justify-between text-[10px] text-slate-500 pt-1">
                     <span>Value: ${prop.totalValue.toLocaleString()}</span>
-                    <span className="text-emerald-700 font-bold">✓ E-SIGNED</span>
+                    <span className="text-emerald-700 font-bold flex items-center gap-1"><CheckCircle2 className="w-3.5 h-3.5" /> E-SIGNED</span>
                   </div>
                 </div>
               ))}

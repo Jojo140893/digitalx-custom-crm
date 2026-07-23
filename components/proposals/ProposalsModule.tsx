@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState } from 'react';
-import { FileCheck, Search, Plus, CheckCircle2, FileText, Send, Sparkles, X, ShieldCheck, PenTool } from 'lucide-react';
+import { FileCheck, Search, Plus, CheckCircle2, FileText, Send, Sparkles, X, ShieldCheck, PenTool, Lock } from 'lucide-react';
 import { Proposal, Client } from '@/lib/types';
 import { crmStore } from '@/lib/store';
 import { generateAiProposal } from '@/lib/ai-engine';
@@ -92,7 +92,7 @@ export const ProposalsModule: React.FC<ProposalsModuleProps> = ({
                         <p className="font-semibold text-slate-800">{phase.phaseName}</p>
                         <p className="text-[11px] text-slate-500">{phase.scope} • {phase.timeline}</p>
                       </div>
-                      <span className="font-bold text-emerald-700">{isAdmin ? `$${phase.cost.toLocaleString()}` : '🔒'}</span>
+                      <span className="font-bold text-emerald-700">{isAdmin ? `$${phase.cost.toLocaleString()}` : <Lock className="w-3.5 h-3.5 text-slate-400 inline" />}</span>
                     </div>
                   ))}
                 </div>
@@ -113,7 +113,7 @@ export const ProposalsModule: React.FC<ProposalsModuleProps> = ({
             </div>
 
             <div className="pt-3 border-t border-slate-100 flex items-center justify-between">
-              <span className="text-sm font-bold text-slate-900">Total: {isAdmin ? `$${prop.totalValue.toLocaleString()}` : '🔒'}</span>
+              <span className="text-sm font-bold text-slate-900">Total: {isAdmin ? `$${prop.totalValue.toLocaleString()}` : <Lock className="w-3.5 h-3.5 text-slate-400 inline" />}</span>
               {!prop.eSigned && (
                 <button
                   onClick={() => {

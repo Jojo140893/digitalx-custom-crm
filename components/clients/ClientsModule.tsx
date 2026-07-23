@@ -19,6 +19,7 @@ import {
   Sparkles,
   ShieldAlert,
   TrendingDown,
+  Lock,
 } from 'lucide-react';
 import { Client } from '@/lib/types';
 import { crmStore } from '@/lib/store';
@@ -88,7 +89,7 @@ export const ClientsModule: React.FC<ClientsModuleProps> = ({
           <div className="h-8 w-px bg-slate-200" />
           <div>
             <p className="text-[10px] text-slate-500 uppercase font-bold">Combined MRR</p>
-            <p className="text-xl font-extrabold text-slate-900">{isAdmin ? crmStore.formatCurrency(totalMRR) + '/mo' : '🔒 Masked'}</p>
+            <p className="text-xl font-extrabold text-slate-900">{isAdmin ? crmStore.formatCurrency(totalMRR) + '/mo' : <span className="inline-flex items-center gap-1 text-slate-400 font-normal"><Lock className="w-4 h-4" /> Masked</span>}</p>
           </div>
         </div>
       </div>
@@ -137,7 +138,7 @@ export const ClientsModule: React.FC<ClientsModuleProps> = ({
                     <p className="text-xs text-slate-600 font-medium">{client.primaryContact}</p>
                   </div>
                   <span className="text-xs px-2 py-0.5 rounded font-mono font-bold bg-slate-100 text-slate-800 border border-slate-200">
-                    {client.country === 'AU' ? '🇦🇺 AU' : '🇺🇸 US'}
+                    {client.country === 'AU' ? 'AU' : 'US'}
                   </span>
                 </div>
 
@@ -146,13 +147,13 @@ export const ClientsModule: React.FC<ClientsModuleProps> = ({
                   <div>
                     <span className="text-[10px] text-slate-500 block font-bold">Setup Fee</span>
                     <span className="font-extrabold text-slate-900">
-                      {isAdmin ? crmStore.formatCurrency(client.setupFee) : '🔒'}
+                      {isAdmin ? crmStore.formatCurrency(client.setupFee) : <Lock className="w-3.5 h-3.5 text-slate-400 inline" />}
                     </span>
                   </div>
                   <div>
                     <span className="text-[10px] text-slate-500 block font-bold">Monthly Retainer</span>
                     <span className="font-extrabold text-emerald-700">
-                      {isAdmin ? `${crmStore.formatCurrency(client.monthlyRetainer)}/mo` : '🔒'}
+                      {isAdmin ? `${crmStore.formatCurrency(client.monthlyRetainer)}/mo` : <Lock className="w-3.5 h-3.5 text-slate-400 inline" />}
                     </span>
                   </div>
                 </div>

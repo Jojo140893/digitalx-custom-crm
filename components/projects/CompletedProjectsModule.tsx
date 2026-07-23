@@ -1,7 +1,7 @@
 'use client';
 
 import React from 'react';
-import { CheckCircle2, Star, DollarSign, Calendar, Quote, Award } from 'lucide-react';
+import { CheckCircle2, Star, DollarSign, Calendar, Quote, Award, Lock } from 'lucide-react';
 import { Project } from '@/lib/types';
 
 interface CompletedProjectsModuleProps {
@@ -41,7 +41,7 @@ export const CompletedProjectsModule: React.FC<CompletedProjectsModuleProps> = (
           <div className="h-8 w-px bg-slate-200" />
           <div>
             <p className="text-[10px] text-slate-500 uppercase font-bold tracking-wider">Total Delivered Value</p>
-            <p className="text-xl font-bold text-slate-900">{isAdmin ? `$${totalValue.toLocaleString()}` : '🔒 Masked'}</p>
+            <p className="text-xl font-bold text-slate-900">{isAdmin ? `$${totalValue.toLocaleString()}` : <span className="inline-flex items-center gap-1 text-slate-400 font-normal"><Lock className="w-4 h-4" /> Masked</span>}</p>
           </div>
         </div>
       </div>
@@ -86,7 +86,7 @@ export const CompletedProjectsModule: React.FC<CompletedProjectsModuleProps> = (
               <div>
                 <span className="text-[10px] text-slate-500 block font-medium">Final Invoice Value</span>
                 <span className="font-bold text-emerald-700">
-                  {isAdmin ? `$${(p.finalInvoiceValue || 0).toLocaleString()}` : '🔒'}
+                  {isAdmin ? `$${(p.finalInvoiceValue || 0).toLocaleString()}` : <Lock className="w-3.5 h-3.5 text-slate-400 inline" />}
                 </span>
               </div>
             </div>

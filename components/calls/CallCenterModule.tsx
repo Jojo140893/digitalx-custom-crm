@@ -15,6 +15,7 @@ import {
   FileText,
   TrendingUp,
   Tag,
+  X,
 } from 'lucide-react';
 import { CallRecord } from '@/lib/types';
 import { crmStore } from '@/lib/store';
@@ -303,7 +304,9 @@ export const CallCenterModule: React.FC<CallCenterModuleProps> = ({ onNavigateTo
               <h3 className="font-extrabold text-base text-slate-900 flex items-center gap-2">
                 <Sparkles className="w-5 h-5 text-indigo-600" /> Simulate Inbound Call Ingestion
               </h3>
-              <button onClick={() => setIsSimulateOpen(false)} className="text-slate-400 hover:text-slate-600 font-bold">✕</button>
+              <button onClick={() => setIsSimulateOpen(false)} className="text-slate-400 hover:text-slate-600 transition-colors p-1" aria-label="Close">
+                <X className="w-5 h-5" />
+              </button>
             </div>
 
             <form onSubmit={handleSimulateCall} className="space-y-3 text-xs">

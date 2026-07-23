@@ -10,6 +10,7 @@ import {
   PhoneCall,
   ShieldCheck,
   Palette,
+  X,
 } from 'lucide-react';
 import { crmStore } from '@/lib/store';
 import { Tenant } from '@/lib/types';
@@ -190,7 +191,9 @@ export const WidgetBuilderModule: React.FC = () => {
                       <Bot className="w-4 h-4" />
                       <span>{botName}</span>
                     </div>
-                    <button onClick={() => setIsPreviewChatOpen(false)} className="hover:opacity-80">✕</button>
+                    <button onClick={() => setIsPreviewChatOpen(false)} className="hover:opacity-80 p-0.5" aria-label="Close">
+                      <X className="w-4 h-4" />
+                    </button>
                   </div>
 
                   <div className="p-3 h-64 overflow-y-auto space-y-2 text-xs bg-slate-50">

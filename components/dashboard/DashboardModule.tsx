@@ -17,6 +17,7 @@ import {
   ChevronRight,
   Shield,
   Sparkles,
+  Lock,
 } from 'lucide-react';
 import { Lead, Client, Project, Task, Invoice, Activity } from '@/lib/types';
 import {
@@ -178,7 +179,7 @@ export const DashboardModule: React.FC<DashboardModuleProps> = ({
             </div>
           </div>
           <p className="text-2xl font-extrabold text-slate-900 mt-3">
-            {isAdmin ? crmStore.formatCurrency(mrr) : '🔒 Hidden'}
+            {isAdmin ? crmStore.formatCurrency(mrr) : <span className="inline-flex items-center gap-1.5 text-slate-400 text-lg font-normal"><Lock className="w-4 h-4" /> Hidden</span>}
           </p>
           <p className="text-[11px] text-emerald-600 font-bold flex items-center gap-1 mt-1">
             <TrendingUp className="w-3 h-3" /> +18.4% YoY
@@ -197,7 +198,7 @@ export const DashboardModule: React.FC<DashboardModuleProps> = ({
             </div>
           </div>
           <p className="text-2xl font-extrabold text-slate-900 mt-3">
-            {isAdmin ? crmStore.formatCurrency(pipelineValue) : '🔒 Hidden'}
+            {isAdmin ? crmStore.formatCurrency(pipelineValue) : <span className="inline-flex items-center gap-1.5 text-slate-400 text-lg font-normal"><Lock className="w-4 h-4" /> Hidden</span>}
           </p>
           <p className="text-[11px] text-slate-500 mt-1">{openLeads.length} active leads</p>
         </div>

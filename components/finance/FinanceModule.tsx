@@ -17,6 +17,7 @@ import {
   CreditCard,
   Building2,
   Sparkles,
+  Lock,
 } from 'lucide-react';
 import { Invoice, Client, TimeLog } from '@/lib/types';
 import { crmStore } from '@/lib/store';
@@ -142,25 +143,25 @@ export const FinanceModule: React.FC<FinanceModuleProps> = ({
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
         <div className="p-5 rounded-2xl bg-white border border-slate-200 shadow-xs space-y-2">
           <span className="text-xs font-bold text-slate-500 uppercase tracking-wider">Monthly MRR</span>
-          <p className="text-2xl font-extrabold text-slate-900">{isAdmin ? `${crmStore.formatCurrency(mrr)}/mo` : '🔒 Masked'}</p>
-          <p className="text-xs text-emerald-700 font-bold">Annualized ARR: {isAdmin ? crmStore.formatCurrency(arr) : '🔒'}</p>
+          <p className="text-2xl font-extrabold text-slate-900">{isAdmin ? `${crmStore.formatCurrency(mrr)}/mo` : <span className="inline-flex items-center gap-1 text-slate-400 font-normal"><Lock className="w-4 h-4" /> Masked</span>}</p>
+          <p className="text-xs text-emerald-700 font-bold">Annualized ARR: {isAdmin ? crmStore.formatCurrency(arr) : <Lock className="w-3 h-3 text-slate-400 inline" />}</p>
         </div>
 
         <div className="p-5 rounded-2xl bg-white border border-slate-200 shadow-xs space-y-2">
           <span className="text-xs font-bold text-slate-500 uppercase tracking-wider">Collected Revenue</span>
-          <p className="text-2xl font-extrabold text-emerald-700">{isAdmin ? crmStore.formatCurrency(totalPaid) : '🔒 Masked'}</p>
+          <p className="text-2xl font-extrabold text-emerald-700">{isAdmin ? crmStore.formatCurrency(totalPaid) : <span className="inline-flex items-center gap-1 text-slate-400 font-normal"><Lock className="w-4 h-4" /> Masked</span>}</p>
           <p className="text-xs text-slate-600 font-medium">Paid Invoices</p>
         </div>
 
         <div className="p-5 rounded-2xl bg-white border border-slate-200 shadow-xs space-y-2">
           <span className="text-xs font-bold text-slate-500 uppercase tracking-wider">Outstanding Unpaid</span>
-          <p className="text-2xl font-extrabold text-amber-600">{isAdmin ? crmStore.formatCurrency(totalUnpaid) : '🔒 Masked'}</p>
+          <p className="text-2xl font-extrabold text-amber-600">{isAdmin ? crmStore.formatCurrency(totalUnpaid) : <span className="inline-flex items-center gap-1 text-slate-400 font-normal"><Lock className="w-4 h-4" /> Masked</span>}</p>
           <p className="text-xs text-amber-700 font-bold">Awaiting payment</p>
         </div>
 
         <div className="p-5 rounded-2xl bg-white border border-slate-200 shadow-xs space-y-2">
           <span className="text-xs font-bold text-slate-500 uppercase tracking-wider">Overdue Collections</span>
-          <p className="text-2xl font-extrabold text-rose-600">{isAdmin ? crmStore.formatCurrency(totalOverdue) : '🔒 Masked'}</p>
+          <p className="text-2xl font-extrabold text-rose-600">{isAdmin ? crmStore.formatCurrency(totalOverdue) : <span className="inline-flex items-center gap-1 text-slate-400 font-normal"><Lock className="w-4 h-4" /> Masked</span>}</p>
           <p className="text-xs text-rose-700 font-bold">Reminders active</p>
         </div>
       </div>
@@ -199,7 +200,7 @@ export const FinanceModule: React.FC<FinanceModuleProps> = ({
                 </div>
 
                 <div className="grid grid-cols-2 gap-2 text-xs pt-1 text-slate-700 font-semibold">
-                  <div>Retainer: <span className="text-slate-900 font-extrabold">{isAdmin ? crmStore.formatCurrency(client.monthlyRetainer) : '🔒'}</span></div>
+                  <div>Retainer: <span className="text-slate-900 font-extrabold">{isAdmin ? crmStore.formatCurrency(client.monthlyRetainer) : <Lock className="w-3.5 h-3.5 text-slate-400 inline" />}</span></div>
                   <div>Hours: <span className="text-slate-900 font-extrabold">{totalHours}h</span></div>
                 </div>
               </div>
@@ -256,7 +257,7 @@ export const FinanceModule: React.FC<FinanceModuleProps> = ({
                     </span>
                   </td>
                   <td className="p-4 font-extrabold text-slate-900 text-sm">
-                    {isAdmin ? crmStore.formatCurrency(inv.amount) : '🔒'}
+                    {isAdmin ? crmStore.formatCurrency(inv.amount) : <Lock className="w-3.5 h-3.5 text-slate-400 inline" />}
                   </td>
                   <td className="p-4 text-slate-700 text-xs font-medium">
                     Issue: {inv.issueDate} <br />
