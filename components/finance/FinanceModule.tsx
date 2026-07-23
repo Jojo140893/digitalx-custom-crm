@@ -20,6 +20,7 @@ import {
 } from 'lucide-react';
 import { Invoice, Client, TimeLog } from '@/lib/types';
 import { crmStore } from '@/lib/store';
+import { analyzeClientMargin, generateInvoiceReminder } from '@/lib/ai-engine';
 
 interface FinanceModuleProps {
   invoices: Invoice[];

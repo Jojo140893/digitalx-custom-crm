@@ -19,6 +19,10 @@ import {
   BarChart3,
   ShieldAlert,
   Timer,
+  PhoneCall,
+  Bot,
+  CreditCard,
+  ShieldCheck,
   Building2,
 } from 'lucide-react';
 
@@ -28,8 +32,8 @@ export type ModuleKey =
   | 'clients'
   | 'churned-clients'
   | 'projects'
-  | 'completed-projects'
   | 'pending-projects'
+  | 'completed-projects'
   | 'finance'
   | 'employees'
   | 'employee-background'
@@ -39,7 +43,11 @@ export type ModuleKey =
   | 'integrations'
   | 'reports'
   | 'audit'
-  | 'timetracking';
+  | 'timetracking'
+  | 'callcenter'
+  | 'portal'
+  | 'widgets'
+  | 'billing';
 
 interface SidebarProps {
   currentModule: ModuleKey;
@@ -66,6 +74,8 @@ export const Sidebar: React.FC<SidebarProps> = ({
       label: 'EXECUTIVE & PIPELINE',
       items: [
         { key: 'dashboard', label: 'Command Dashboard', icon: LayoutDashboard },
+        { key: 'callcenter', label: 'Call Command Center', icon: PhoneCall },
+        { key: 'portal', label: 'Client Portal', icon: ShieldCheck },
         { key: 'leads', label: 'Lead Pipeline', icon: UserPlus, badge: counts.leads, badgeColor: 'bg-indigo-100 text-indigo-800 border-indigo-200' },
         { key: 'clients', label: 'Active Clients', icon: Users, badge: counts.activeClients, badgeColor: 'bg-emerald-100 text-emerald-800 border-emerald-200' },
         { key: 'churned-clients', label: 'Churned Archive', icon: UserX },
@@ -75,6 +85,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
       label: 'DELIVERY & OPERATIONS',
       items: [
         { key: 'projects', label: 'Client Projects', icon: Briefcase },
+        { key: 'widgets', label: 'AI Widget Builder', icon: Bot },
         { key: 'pending-projects', label: 'Pending / Delayed', icon: Clock, badge: counts.pendingProjects > 0 ? counts.pendingProjects : undefined, badgeColor: 'bg-amber-100 text-amber-800 border-amber-200' },
         { key: 'completed-projects', label: 'Completed Builds', icon: CheckCircle2 },
       ],
@@ -83,6 +94,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
       label: 'FINANCE & TEAM',
       items: [
         { key: 'finance', label: 'Finance & Invoices', icon: DollarSign, badge: counts.overdueInvoices > 0 ? counts.overdueInvoices : undefined, badgeColor: 'bg-rose-100 text-rose-800 border-rose-200' },
+        { key: 'billing', label: 'SaaS Tiers & Metering', icon: CreditCard },
         { key: 'proposals', label: 'Proposals & Scope', icon: FileCheck },
         { key: 'employees', label: 'Staff Directory', icon: UserCheck },
         { key: 'employee-background', label: 'Employee Profiles', icon: FileText },
@@ -126,7 +138,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
               <h1 className="font-bold text-base text-slate-900 tracking-tight flex items-center gap-1.5">
                 DigitalX <span className="text-[10px] px-1.5 py-0.5 rounded bg-indigo-50 text-indigo-700 font-mono border border-indigo-200 font-semibold">Enterprise v4.2</span>
               </h1>
-              <p className="text-[11px] text-slate-500 font-medium">SOC2 Certified CRM Suite</p>
+              <p className="text-[11px] text-slate-500 font-medium">SOC 2 Audit in Progress</p>
             </div>
           </div>
         </div>
@@ -189,7 +201,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
               <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" title="Systems Operational" />
             </div>
             <p className="text-slate-500 text-[11px] font-medium">Sydney (syd1) • NYC (iad1)</p>
-            <p className="text-[10px] text-slate-500 font-mono pt-1 border-t border-slate-100">SLA: 99.99% • Latency: 14ms</p>
+            <p className="text-[10px] text-slate-500 font-mono pt-1 border-t border-slate-100">Security: Encrypted • Multi-Tenant</p>
           </div>
         </div>
       </aside>

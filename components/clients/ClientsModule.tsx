@@ -16,9 +16,13 @@ import {
   X,
   Globe,
   Tag,
+  Sparkles,
+  ShieldAlert,
+  TrendingDown,
 } from 'lucide-react';
 import { Client } from '@/lib/types';
 import { crmStore } from '@/lib/store';
+import { calculateClientHealth } from '@/lib/ai-engine';
 
 interface ClientsModuleProps {
   clients: Client[];

@@ -10,7 +10,8 @@ import {
   TimeLog,
   AuditLog,
   WebhookLog,
-  UserRole,
+  CallRecord,
+  Tenant,
 } from './types';
 import {
   INITIAL_USERS,
@@ -24,10 +25,11 @@ import {
   INITIAL_TIMELOGS,
   INITIAL_AUDITLOGS,
   INITIAL_WEBHOOKS,
+  INITIAL_CALL_RECORDS,
 } from './mockData';
+import { DEFAULT_TENANT, MOCK_TENANTS } from './tenant';
 import { toast } from './toast';
 import { syncToSupabase } from './supabase';
-
 
 class CRMStore {
   private users: User[] = [...INITIAL_USERS];
@@ -41,10 +43,12 @@ class CRMStore {
   private timeLogs: TimeLog[] = [...INITIAL_TIMELOGS];
   private auditLogs: AuditLog[] = [...INITIAL_AUDITLOGS];
   private webhooks: WebhookLog[] = [...INITIAL_WEBHOOKS];
+  private callRecords: CallRecord[] = [...INITIAL_CALL_RECORDS];
 
+  private activeTenant: Tenant = { ...DEFAULT_TENANT };
+  private tenantsList: Tenant[] = [...MOCK_TENANTS];
   private currentUser: User = INITIAL_USERS[0]; // Admin Sarah Jenkins by default
   private currency: 'AUD' | 'USD' = 'AUD';
-  private tenant: string = 'Sydney HQ (AU)';
   private exchangeRate: number = 0.67; // 1 AUD = 0.67 USD
   private listeners: (() => void)[] = [];
 
@@ -67,9 +71,10 @@ class CRMStore {
       localStorage.setItem('digitalx_activities', JSON.stringify(this.activities));
       localStorage.setItem('digitalx_timeLogs', JSON.stringify(this.timeLogs));
       localStorage.setItem('digitalx_auditLogs', JSON.stringify(this.auditLogs));
+      localStorage.setItem('digitalx_callRecords', JSON.stringify(this.callRecords));
       localStorage.setItem('digitalx_currentUser', JSON.stringify(this.currentUser));
       localStorage.setItem('digitalx_currency', this.currency);
-      localStorage.setItem('digitalx_tenant', this.tenant);
+      localStorage.setItem('digitalx_activeTenant', JSON.stringify(this.activeTenant));
     } catch (e) {
       console.error('Storage error:', e);
     }
@@ -97,15 +102,43 @@ class CRMStore {
       if (tl) this.timeLogs = JSON.parse(tl);
       const aud = localStorage.getItem('digitalx_auditLogs');
       if (aud) this.auditLogs = JSON.parse(aud);
+      const cr = localStorage.getItem('digitalx_callRecords');
+      if (cr) this.callRecords = JSON.parse(cr);
       const cur = localStorage.getItem('digitalx_currentUser');
       if (cur) this.currentUser = JSON.parse(cur);
       const curr = localStorage.getItem('digitalx_currency');
       if (curr) this.currency = curr as 'AUD' | 'USD';
-      const ten = localStorage.getItem('digitalx_tenant');
-      if (ten) this.tenant = ten;
+      const ten = localStorage.getItem('digitalx_activeTenant');
+      if (ten) this.activeTenant = JSON.parse(ten);
     } catch (e) {
       console.error('Failed to load storage:', e);
     }
+  }
+
+  // --- Multi-Tenant Controls ---
+  public getActiveTenant(): Tenant {
+    return this.activeTenant;
+  }
+
+  public getTenants(): Tenant[] {
+    return this.tenantsList;
+  }
+
+  public setActiveTenant(tenantId: string) {
+    const found = this.tenantsList.find((t) => t.id === tenantId);
+    if (found) {
+      this.activeTenant = found;
+      this.logAudit('TENANT_SWITCH', 'Tenant', found.id, `Switched active tenant to ${found.name}`);
+      toast.info(`Tenant Switched: ${found.name}`, `Branding & data context set to ${found.name}`);
+      this.notify();
+    }
+  }
+
+  public recordAiUsage(tokens: number = 0, voiceMinutes: number = 0, proposals: number = 0) {
+    this.activeTenant.aiTokensUsed += tokens;
+    this.activeTenant.voiceMinutesUsed += voiceMinutes;
+    this.activeTenant.proposalsGenerated += proposals;
+    this.notify();
   }
 
   // --- Enterprise Currency & Region Controls ---
@@ -119,16 +152,6 @@ class CRMStore {
     this.notify();
   }
 
-  public getTenant(): string {
-    return this.tenant;
-  }
-
-  public setTenant(t: string) {
-    this.tenant = t;
-    toast.info(`Organization Switched`, `Active region set to ${t}`);
-    this.notify();
-  }
-
   public formatCurrency(amountAUD: number): string {
     if (this.currency === 'USD') {
       const converted = Math.round(amountAUD * this.exchangeRate);
@@ -138,7 +161,6 @@ class CRMStore {
   }
 
   public subscribe(listener: () => void) {
-
     this.listeners.push(listener);
     return () => {
       this.listeners = this.listeners.filter((l) => l !== listener);
@@ -158,7 +180,7 @@ class CRMStore {
   public setCurrentUser(user: User) {
     this.currentUser = user;
     this.logAudit('USER_SWITCH', 'User', user.id, `Switched active session to ${user.name} (${user.role})`);
-    toast.info(`Session Role: ${user.name}`, `Active permissions updated to ${user.role === 'ADMIN' ? 'Founder (Admin)' : 'Team Member'}`);
+    toast.info(`Session Role: ${user.name}`, `Active permissions updated to ${user.role}`);
     this.notify();
   }
 
@@ -184,10 +206,40 @@ class CRMStore {
     return newUser;
   }
 
+  // --- Call Records ---
+  public getCallRecords(): CallRecord[] {
+    return this.callRecords;
+  }
+
+  public addCallRecord(call: Omit<CallRecord, 'id' | 'createdAt' | 'tenantId'>): CallRecord {
+    const newCall: CallRecord = {
+      ...call,
+      id: `call-${Date.now()}`,
+      tenantId: this.activeTenant.id,
+      createdAt: new Date().toISOString(),
+    };
+    this.callRecords.unshift(newCall);
+
+    // Auto-activity logging from transcript!
+    this.logActivity({
+      entityName: newCall.callerName,
+      type: 'CALL',
+      title: `Call Transcribed: ${newCall.callerName} (${newCall.status})`,
+      description: newCall.summary || newCall.transcript.slice(0, 150),
+    });
+
+    // Record voice minutes usage
+    const minutes = Math.ceil(newCall.durationSeconds / 60);
+    this.recordAiUsage(0, minutes, 0);
+
+    toast.success('Call Logged & Transcribed', `Auto-activity created for ${newCall.callerName}`);
+    this.notify();
+    return newCall;
+  }
+
   // --- Leads ---
   public getLeads(): Lead[] {
     if (!this.isAdmin()) {
-      // Team members see assigned leads or unassigned
       return this.leads.filter((l) => l.ownerId === this.currentUser.id || !l.ownerId);
     }
     return this.leads;
@@ -235,6 +287,9 @@ class CRMStore {
       vertical: lead.vertical,
       country: lead.country,
       status: 'ACTIVE',
+      healthScore: 90,
+      healthRisk: 'LOW',
+      marginPercent: 35.0,
       servicesSold,
       setupFee,
       monthlyRetainer,
@@ -251,7 +306,6 @@ class CRMStore {
 
     this.clients.unshift(newClient);
 
-    // Automatically create initial setup invoice
     if (setupFee > 0) {
       this.invoices.unshift({
         id: `inv-${Date.now()}`,
@@ -272,7 +326,6 @@ class CRMStore {
     this.notify();
     return newClient;
   }
-
 
   // --- Clients ---
   public getClients(): Client[] {
@@ -376,7 +429,7 @@ class CRMStore {
       createdAt: new Date().toISOString().split('T')[0],
     };
     this.tasks.unshift(newTask);
-    toast.success('Task Added', `"${newTask.title}" assigned to ${newTask.assigneeName}`);
+    toast.success('Task Added', `"${newTask.title}" assigned to ${newTask.assignedTo}`);
     this.notify();
     return newTask;
   }
@@ -487,7 +540,7 @@ class CRMStore {
       loggedAt: new Date().toISOString(),
     };
     this.activities.unshift(newAct);
-    toast.info('Activity Logged', `${newAct.type} logged for ${newAct.targetName}`);
+    toast.info('Activity Logged', `${newAct.type} logged for ${newAct.entityName}`);
     this.notify();
     return newAct;
   }
@@ -509,7 +562,6 @@ class CRMStore {
       userRole: this.currentUser.role,
       action,
       entityType,
-      entityId,
       details,
       timestamp: new Date().toISOString(),
     };
@@ -531,7 +583,6 @@ class CRMStore {
     };
     this.webhooks.unshift(log);
 
-    // If GHL/Apollo/Meta lead payload, auto-create lead!
     if (payload.company || payload.name) {
       this.addLead({
         name: payload.name || 'Webhook Lead',
@@ -554,7 +605,6 @@ class CRMStore {
     toast.info(`Webhook Ingested (${source})`, `Live payload processed & logged`);
     this.notify();
   }
-
 }
 
 export const crmStore = new CRMStore();

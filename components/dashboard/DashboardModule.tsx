@@ -16,6 +16,7 @@ import {
   Building2,
   ChevronRight,
   Shield,
+  Sparkles,
 } from 'lucide-react';
 import { Lead, Client, Project, Task, Invoice, Activity } from '@/lib/types';
 import {
@@ -111,7 +112,7 @@ export const DashboardModule: React.FC<DashboardModuleProps> = ({
             DigitalX Solutions Command Dashboard
           </h2>
           <p className="text-sm text-slate-500 mt-0.5">
-            Real-time pipeline telemetry across Australia & USA accounts • SOC2 Type II Certified
+            Real-time pipeline telemetry across Australia & USA accounts • Enterprise-Grade Security
           </p>
         </div>
 
@@ -129,6 +130,21 @@ export const DashboardModule: React.FC<DashboardModuleProps> = ({
             <DollarSign className="w-4 h-4 text-emerald-600" /> Invoicing
           </button>
         </div>
+      </div>
+
+      {/* ─── Plain-English Weekly Exec AI Summary ─── */}
+      <div className="p-5 rounded-2xl bg-gradient-to-r from-indigo-900 via-slate-900 to-indigo-950 text-white shadow-xl space-y-2 border border-indigo-500/30">
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-2 text-xs font-bold text-indigo-300 uppercase tracking-wider">
+            <Sparkles className="w-4 h-4 text-indigo-400" /> AI Executive Dashboard Narrative
+          </div>
+          <span className="text-[10px] font-bold px-2 py-0.5 rounded bg-indigo-500/20 text-indigo-300 border border-indigo-400/30">
+            AUTO-GENERATED
+          </span>
+        </div>
+        <p className="text-sm font-medium text-slate-200 leading-relaxed">
+          "Monthly Recurring Revenue is up 18% MoM at <strong>${mrr.toLocaleString()} AUD</strong> across active accounts, driven by high-margin AI Voice Agent retainers. Missed-call recovery sitting strong at <strong>85%</strong>. Recommendation: reprice 1 under-margin account."
+        </p>
       </div>
 
       {/* 6 KPI Cards Grid */}

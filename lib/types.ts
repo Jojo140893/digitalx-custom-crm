@@ -1,7 +1,25 @@
-export type UserRole = 'ADMIN' | 'MEMBER';
+export type UserRole = 'ADMIN' | 'MANAGER' | 'MEMBER' | 'CLIENT';
+
+export interface Tenant {
+  id: string;
+  name: string;
+  slug: string;
+  logoUrl?: string;
+  primaryColor: string;
+  domain?: string;
+  plan: 'STARTER' | 'AGENCY' | 'ENTERPRISE';
+  widgetKey: string;
+  encryptedSecrets: Record<string, string>;
+  aiTokensUsed: number;
+  voiceMinutesUsed: number;
+  proposalsGenerated: number;
+  createdAt: string;
+  updatedAt: string;
+}
 
 export interface User {
   id: string;
+  tenantId?: string;
   name: string;
   email: string;
   role: UserRole;
@@ -25,6 +43,7 @@ export type LeadStatus = 'NEW' | 'CONTACTED' | 'QUALIFIED' | 'PROPOSAL_SENT' | '
 
 export interface Lead {
   id: string;
+  tenantId?: string;
   name: string;
   company: string;
   email: string;
@@ -34,6 +53,7 @@ export interface Lead {
   country: CountryCode;
   status: LeadStatus;
   score: number;
+  nextAction?: string;
   ownerId: string;
   ownerName: string;
   notes: string;
@@ -50,6 +70,7 @@ export interface OnboardingItem {
 
 export interface Client {
   id: string;
+  tenantId?: string;
   leadId?: string;
   companyName: string;
   primaryContact: string;
@@ -58,6 +79,9 @@ export interface Client {
   vertical: LeadVertical;
   country: CountryCode;
   status: 'ACTIVE' | 'CHURNED';
+  healthScore?: number;
+  healthRisk?: 'LOW' | 'MEDIUM' | 'HIGH';
+  marginPercent?: number;
   servicesSold: string[];
   setupFee: number;
   monthlyRetainer: number;
@@ -84,6 +108,7 @@ export type ProjectStatus = 'PENDING' | 'IN_PROGRESS' | 'COMPLETED' | 'ON_HOLD';
 
 export interface Project {
   id: string;
+  tenantId?: string;
   clientId: string;
   clientName: string;
   name: string;
@@ -105,6 +130,7 @@ export interface Project {
 
 export interface Task {
   id: string;
+  tenantId?: string;
   projectId?: string;
   projectName?: string;
   clientId?: string;
@@ -129,6 +155,7 @@ export interface ProposalPhase {
 
 export interface Proposal {
   id: string;
+  tenantId?: string;
   clientId: string;
   clientName: string;
   title: string;
@@ -144,6 +171,7 @@ export interface Proposal {
 
 export interface Invoice {
   id: string;
+  tenantId?: string;
   invoiceNumber: string;
   clientId: string;
   clientName: string;
@@ -157,6 +185,7 @@ export interface Invoice {
 
 export interface Activity {
   id: string;
+  tenantId?: string;
   leadId?: string;
   clientId?: string;
   entityName: string;
@@ -170,6 +199,7 @@ export interface Activity {
 
 export interface TimeLog {
   id: string;
+  tenantId?: string;
   employeeId: string;
   employeeName: string;
   projectId: string;
@@ -184,6 +214,7 @@ export interface TimeLog {
 
 export interface AuditLog {
   id: string;
+  tenantId?: string;
   userName: string;
   userRole: string;
   action: string;
@@ -194,8 +225,27 @@ export interface AuditLog {
 
 export interface WebhookLog {
   id: string;
+  tenantId?: string;
   source: 'GoHighLevel' | 'Apollo.io' | 'n8n' | 'Meta Ads' | 'GA4';
   payload: Record<string, any>;
   receivedAt: string;
   status: 'PROCESSED' | 'FAILED';
+}
+
+export interface CallRecord {
+  id: string;
+  tenantId: string;
+  leadId?: string;
+  clientId?: string;
+  callerName: string;
+  callerPhone: string;
+  direction: 'INBOUND' | 'OUTBOUND';
+  durationSeconds: number;
+  status: 'COMPLETED' | 'MISSED' | 'RECOVERED';
+  recordingUrl?: string;
+  transcript: string;
+  summary?: string;
+  sentiment: 'POSITIVE' | 'NEUTRAL' | 'NEGATIVE';
+  actionItems: string[];
+  createdAt: string;
 }

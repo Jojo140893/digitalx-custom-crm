@@ -4,6 +4,7 @@ import React, { useState } from 'react';
 import { FileCheck, Search, Plus, CheckCircle2, FileText, Send, Sparkles, X, ShieldCheck, PenTool } from 'lucide-react';
 import { Proposal, Client } from '@/lib/types';
 import { crmStore } from '@/lib/store';
+import { generateAiProposal } from '@/lib/ai-engine';
 
 interface ProposalsModuleProps {
   proposals: Proposal[];

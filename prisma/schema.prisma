@@ -7,159 +7,211 @@ datasource db {
   url      = "file:./dev.db"
 }
 
-model User {
-  id               String       @id @default(uuid())
-  name             String
-  email            String       @unique
-  role             String       @default("MEMBER") // ADMIN or MEMBER
-  department       String       @default("Engineering")
-  phone            String?
-  avatar           String?
-  status           String       @default("ACTIVE")
-  startDate        String?
-  skills           String       @default("[]") // JSON string array
-  certifications   String       @default("[]") // JSON string array
-  experienceNotes  String?
-  cvUrl            String?
-  rating           Float        @default(4.8)
-  workloadLevel    String       @default("MEDIUM") // LOW, MEDIUM, HIGH
+model Tenant {
+  id                 String   @id @default(uuid())
+  name               String
+  slug               String   @unique
+  logoUrl            String?
+  primaryColor       String   @default("#4f46e5")
+  domain             String?
+  plan               String   @default("AGENCY") // STARTER, AGENCY, ENTERPRISE
+  widgetKey          String   @unique @default(uuid()) // Public API key for embeddable widgets
+  encryptedSecrets   String   @default("{}") // Encrypted JSON store for Apollo, Meta, GHL, Twilio/Vapi API keys
+  aiTokensUsed       Int      @default(0)
+  voiceMinutesUsed   Int      @default(0)
+  proposalsGenerated Int      @default(0)
+  createdAt          DateTime @default(now())
+  updatedAt          DateTime @updatedAt
 
-  leads            Lead[]       @relation("LeadOwner")
-  activities       Activity[]
-  timeLogs         TimeLog[]
-  auditLogs        AuditLog[]
-  createdAt        DateTime     @default(now())
-  updatedAt        DateTime     @updatedAt
+  users       User[]
+  leads       Lead[]
+  clients     Client[]
+  projects    Project[]
+  tasks       Task[]
+  proposals   Proposal[]
+  invoices    Invoice[]
+  activities  Activity[]
+  timeLogs    TimeLog[]
+  auditLogs   AuditLog[]
+  webhookLogs WebhookLog[]
+  callRecords CallRecord[]
+}
+
+model User {
+  id              String   @id @default(uuid())
+  tenantId        String   @default("default-tenant")
+  tenant          Tenant   @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  name            String
+  email           String   @unique
+  role            String   @default("MEMBER") // ADMIN, MANAGER, MEMBER, CLIENT
+  department      String   @default("Engineering")
+  phone           String?
+  avatar          String?
+  status          String   @default("ACTIVE")
+  startDate       String?
+  skills          String   @default("[]") // JSON string array
+  certifications  String   @default("[]") // JSON string array
+  experienceNotes String?
+  cvUrl           String?
+  rating          Float    @default(4.8)
+  workloadLevel   String   @default("MEDIUM") // LOW, MEDIUM, HIGH
+
+  leads      Lead[]     @relation("LeadOwner")
+  activities Activity[]
+  timeLogs   TimeLog[]
+  auditLogs  AuditLog[]
+  createdAt  DateTime   @default(now())
+  updatedAt  DateTime   @updatedAt
 }
 
 model Lead {
-  id           String     @id @default(uuid())
+  id           String   @id @default(uuid())
+  tenantId     String   @default("default-tenant")
+  tenant       Tenant   @relation(fields: [tenantId], references: [id], onDelete: Cascade)
   name         String
   company      String
   email        String
   phone        String?
-  source       String     @default("Website") // Apollo, Meta Ads, Website, GHL, Referral
-  vertical     String     @default("Home Services") // Home Services, Healthcare, Automotive, Beauty & Wellness, Professional Services, Hospitality
-  country      String     @default("AU") // AU, US
-  status       String     @default("NEW") // NEW, CONTACTED, QUALIFIED, PROPOSAL_SENT, NEGOTIATION, WON, LOST
-  score        Int        @default(50)
+  source       String   @default("Website") // Apollo, Meta Ads, Website, GHL, Referral
+  vertical     String   @default("Home Services") // Home Services, Healthcare, Automotive, Beauty & Wellness, Professional Services, Hospitality
+  country      String   @default("AU") // AU, US
+  status       String   @default("NEW") // NEW, CONTACTED, QUALIFIED, PROPOSAL_SENT, NEGOTIATION, WON, LOST
+  score        Int      @default(50)
+  nextAction   String?  // AI predicted next best action
   ownerId      String?
-  owner        User?      @relation("LeadOwner", fields: [ownerId], references: [id])
+  owner        User?    @relation("LeadOwner", fields: [ownerId], references: [id])
   notes        String?
-  tags         String     @default("[]") // JSON string array
+  tags         String   @default("[]") // JSON string array
   followUpDate String?
-  
-  activities   Activity[]
-  clients      Client[]
-  createdAt    DateTime   @default(now())
-  updatedAt    DateTime   @updatedAt
+
+  activities  Activity[]
+  clients     Client[]
+  callRecords CallRecord[]
+  createdAt   DateTime     @default(now())
+  updatedAt   DateTime     @updatedAt
 }
 
 model Client {
-  id                  String     @id @default(uuid())
+  id                  String   @id @default(uuid())
+  tenantId            String   @default("default-tenant")
+  tenant              Tenant   @relation(fields: [tenantId], references: [id], onDelete: Cascade)
   leadId              String?
-  lead                Lead?      @relation(fields: [leadId], references: [id])
+  lead                Lead?    @relation(fields: [leadId], references: [id])
   companyName         String
   primaryContact      String
   email               String
   phone               String?
-  vertical            String     @default("Home Services")
-  country             String     @default("AU")
-  status              String     @default("ACTIVE") // ACTIVE, CHURNED
-  servicesSold        String     @default("[]") // JSON array of services
-  setupFee            Float      @default(0.0)
-  monthlyRetainer     Float      @default(0.0)
+  vertical            String   @default("Home Services")
+  country             String   @default("AU")
+  status              String   @default("ACTIVE") // ACTIVE, CHURNED
+  healthScore         Int      @default(85) // 0-100 client health score
+  healthRisk          String   @default("LOW") // LOW, MEDIUM, HIGH
+  marginPercent       Float    @default(35.0) // Effective margin %
+  servicesSold        String   @default("[]") // JSON array of services
+  setupFee            Float    @default(0.0)
+  monthlyRetainer     Float    @default(0.0)
   contractStartDate   String
   exitDate            String?
   churnReason         String?
-  lifetimeRevenue     Float      @default(0.0)
+  lifetimeRevenue     Float    @default(0.0)
   reactivationNotes   String?
-  onboardingChecklist String     @default("[]") // JSON array of items { task: string, done: boolean }
+  onboardingChecklist String   @default("[]") // JSON array of items { task: string, done: boolean }
 
-  projects            Project[]
-  invoices            Invoice[]
-  proposals           Proposal[]
-  activities          Activity[]
-  timeLogs            TimeLog[]
-  createdAt           DateTime   @default(now())
-  updatedAt           DateTime   @updatedAt
+  projects    Project[]
+  invoices    Invoice[]
+  proposals   Proposal[]
+  activities  Activity[]
+  timeLogs    TimeLog[]
+  callRecords CallRecord[]
+  createdAt   DateTime   @default(now())
+  updatedAt   DateTime   @updatedAt
 }
 
 model Project {
-  id                String     @id @default(uuid())
+  id                String   @id @default(uuid())
+  tenantId          String   @default("default-tenant")
+  tenant            Tenant   @relation(fields: [tenantId], references: [id], onDelete: Cascade)
   clientId          String
-  client            Client     @relation(fields: [clientId], references: [id], onDelete: Cascade)
+  client            Client   @relation(fields: [clientId], references: [id], onDelete: Cascade)
   name              String
-  serviceType       String     @default("AI Voice Agents")
-  status            String     @default("IN_PROGRESS") // PENDING, IN_PROGRESS, COMPLETED, ON_HOLD
+  serviceType       String   @default("AI Voice Agents")
+  status            String   @default("IN_PROGRESS") // PENDING, IN_PROGRESS, COMPLETED, ON_HOLD
   targetDelivery    String?
   expectedStartDate String?
   completionDate    String?
-  finalInvoiceValue Float      @default(0.0)
+  finalInvoiceValue Float    @default(0.0)
   blockerNotes      String?
   delayReason       String?
   testimonialQuote  String?
-  csatRating        Int?       @default(5)
-  assignees         String     @default("[]") // JSON array of employee names/ids
+  csatRating        Int?     @default(5)
+  assignees         String   @default("[]") // JSON array of employee names/ids
 
-  tasks             Task[]
-  timeLogs          TimeLog[]
-  createdAt         DateTime   @default(now())
-  updatedAt         DateTime   @updatedAt
+  tasks     Task[]
+  timeLogs  TimeLog[]
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
 }
 
 model Task {
-  id             String    @id @default(uuid())
+  id             String   @id @default(uuid())
+  tenantId       String   @default("default-tenant")
+  tenant         Tenant   @relation(fields: [tenantId], references: [id], onDelete: Cascade)
   projectId      String?
-  project        Project?  @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  project        Project? @relation(fields: [projectId], references: [id], onDelete: Cascade)
   clientId       String?
   title          String
-  priority       String    @default("MEDIUM") // LOW, MEDIUM, HIGH, URGENT
-  status         String    @default("TODO") // TODO, IN_PROGRESS, DONE
+  priority       String   @default("MEDIUM") // LOW, MEDIUM, HIGH, URGENT
+  status         String   @default("TODO") // TODO, IN_PROGRESS, DONE
   dueDate        String?
   assignedTo     String?
-  estimatedHours Float     @default(5.0)
-  loggedHours    Float     @default(0.0)
+  estimatedHours Float    @default(5.0)
+  loggedHours    Float    @default(0.0)
 
-  createdAt      DateTime  @default(now())
-  updatedAt      DateTime  @updatedAt
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 }
 
 model Proposal {
-  id              String   @id @default(uuid())
-  clientId        String
-  client          Client   @relation(fields: [clientId], references: [id], onDelete: Cascade)
-  title           String
-  phases          String   @default("[]") // JSON array of phases { phaseName, cost, timeline, scope }
-  version         String   @default("v1.0")
-  status          String   @default("DRAFT") // DRAFT, SENT, ACCEPTED, DECLINED
-  totalValue      Float    @default(0.0)
-  sentDate        String?
-  eSigned         Boolean  @default(false)
-  eSignatureData  String?
+  id             String   @id @default(uuid())
+  tenantId       String   @default("default-tenant")
+  tenant         Tenant   @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  clientId       String
+  client         Client   @relation(fields: [clientId], references: [id], onDelete: Cascade)
+  title          String
+  phases         String   @default("[]") // JSON array of phases { phaseName, cost, timeline, scope }
+  version        String   @default("v1.0")
+  status         String   @default("DRAFT") // DRAFT, SENT, ACCEPTED, DECLINED
+  totalValue     Float    @default(0.0)
+  sentDate       String?
+  eSigned        Boolean  @default(false)
+  eSignatureData String?
 
-  createdAt       DateTime @default(now())
-  updatedAt       DateTime @updatedAt
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 }
 
 model Invoice {
-  id            String    @id @default(uuid())
-  invoiceNumber String    @unique
+  id            String   @id @default(uuid())
+  tenantId      String   @default("default-tenant")
+  tenant        Tenant   @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  invoiceNumber String   @unique
   clientId      String
-  client        Client    @relation(fields: [clientId], references: [id], onDelete: Cascade)
+  client        Client   @relation(fields: [clientId], references: [id], onDelete: Cascade)
   amount        Float
-  type          String    @default("MONTHLY_RETAINER") // SETUP_FEE, MONTHLY_RETAINER, CUSTOM
+  type          String   @default("MONTHLY_RETAINER") // SETUP_FEE, MONTHLY_RETAINER, CUSTOM
   issueDate     String
   dueDate       String
-  status        String    @default("UNPAID") // PAID, UNPAID, OVERDUE
+  status        String   @default("UNPAID") // PAID, UNPAID, OVERDUE
   paidDate      String?
 
-  createdAt     DateTime  @default(now())
-  updatedAt     DateTime  @updatedAt
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 }
 
 model Activity {
   id          String   @id @default(uuid())
+  tenantId    String   @default("default-tenant")
+  tenant      Tenant   @relation(fields: [tenantId], references: [id], onDelete: Cascade)
   leadId      String?
   lead        Lead?    @relation(fields: [leadId], references: [id], onDelete: Cascade)
   clientId    String?
@@ -174,6 +226,8 @@ model Activity {
 
 model TimeLog {
   id          String   @id @default(uuid())
+  tenantId    String   @default("default-tenant")
+  tenant      Tenant   @relation(fields: [tenantId], references: [id], onDelete: Cascade)
   employeeId  String
   employee    User     @relation(fields: [employeeId], references: [id], onDelete: Cascade)
   projectId   String?
@@ -189,6 +243,8 @@ model TimeLog {
 
 model AuditLog {
   id         String   @id @default(uuid())
+  tenantId   String   @default("default-tenant")
+  tenant     Tenant   @relation(fields: [tenantId], references: [id], onDelete: Cascade)
   userId     String?
   user       User?    @relation(fields: [userId], references: [id])
   userName   String   @default("System")
@@ -197,4 +253,36 @@ model AuditLog {
   entityId   String?
   details    String
   createdAt  DateTime @default(now())
+}
+
+model WebhookLog {
+  id         String   @id @default(uuid())
+  tenantId   String   @default("default-tenant")
+  tenant     Tenant   @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  source     String
+  payload    String
+  receivedAt DateTime @default(now())
+  status     String   @default("PROCESSED")
+}
+
+model CallRecord {
+  id              String   @id @default(uuid())
+  tenantId        String   @default("default-tenant")
+  tenant          Tenant   @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  leadId          String?
+  lead            Lead?    @relation(fields: [leadId], references: [id], onDelete: Cascade)
+  clientId        String?
+  client          Client?  @relation(fields: [clientId], references: [id], onDelete: Cascade)
+  callerName      String
+  callerPhone     String
+  direction       String   @default("INBOUND") // INBOUND, OUTBOUND
+  durationSeconds Int      @default(0)
+  status          String   @default("COMPLETED") // COMPLETED, MISSED, RECOVERED
+  recordingUrl    String?
+  transcript      String
+  summary         String?
+  sentiment       String   @default("NEUTRAL") // POSITIVE, NEUTRAL, NEGATIVE
+  actionItems     String   @default("[]") // JSON string array
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
 }

@@ -23,6 +23,10 @@ import { IntegrationsHubModule } from '@/components/integrations/IntegrationsHub
 import { ReportsModule } from '@/components/reports/ReportsModule';
 import { AuditLogModule } from '@/components/audit/AuditLogModule';
 import { TimeTrackingModule } from '@/components/timetracking/TimeTrackingModule';
+import { CallCenterModule } from '@/components/calls/CallCenterModule';
+import { ClientPortalModule } from '@/components/portal/ClientPortalModule';
+import { WidgetBuilderModule } from '@/components/widgets/WidgetBuilderModule';
+import { BillingModule } from '@/components/billing/BillingModule';
 
 import { crmStore } from '@/lib/store';
 import { User } from '@/lib/types';
@@ -212,6 +216,22 @@ export default function CRMPage() {
           {currentModule === 'timetracking' && (
             <TimeTrackingModule timeLogs={timeLogs} />
           )}
+
+          {currentModule === 'callcenter' && (
+            <CallCenterModule onNavigateToActivity={() => setCurrentModule('activities')} />
+          )}
+
+          {currentModule === 'portal' && (
+            <ClientPortalModule />
+          )}
+
+          {currentModule === 'widgets' && (
+            <WidgetBuilderModule />
+          )}
+
+          {currentModule === 'billing' && (
+            <BillingModule />
+          )}
         </main>
       </div>
 
@@ -219,6 +239,7 @@ export default function CRMPage() {
       <GlobalSearchModal
         isOpen={isSearchOpen}
         onClose={() => setIsSearchOpen(false)}
+        onOpen={() => setIsSearchOpen(true)}
         leads={leads}
         clients={clients}
         projects={projects}

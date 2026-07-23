@@ -1,10 +1,22 @@
 'use client';
 
-import React, { useState } from 'react';
-import { Search, Bell, Shield, User as UserIcon, Menu, Database, Check, ChevronDown, RefreshCw, Globe, DollarSign, Lock } from 'lucide-react';
+import React, { useState, useRef, useEffect } from 'react';
+import {
+  Search,
+  Shield,
+  Menu,
+  Database,
+  Check,
+  ChevronDown,
+  Globe,
+  DollarSign,
+  Lock,
+  Bell,
+  Settings,
+  Command,
+} from 'lucide-react';
 import { User } from '@/lib/types';
-import { isSupabaseConfigured, checkSupabaseHealth } from '@/lib/supabase';
-import { toast } from '@/lib/toast';
+import { isSupabaseConfigured } from '@/lib/supabase';
 import { crmStore } from '@/lib/store';
 
 interface NavbarProps {
@@ -24,136 +36,147 @@ export const Navbar: React.FC<NavbarProps> = ({
   onOpenMobileMenu,
   onOpenSupabaseConfig,
 }) => {
-  const [showRoleMenu, setShowRoleMenu] = useState(false);
-  const [showTenantMenu, setShowTenantMenu] = useState(false);
+  const [showUserMenu, setShowUserMenu] = useState(false);
+  const userMenuRef = useRef<HTMLDivElement>(null);
 
   const isAdmin = currentUser.role === 'ADMIN';
   const currentCurrency = crmStore.getCurrency();
-  const currentTenant = crmStore.getTenant();
 
   const toggleCurrency = () => {
-    const nextCurrency = currentCurrency === 'AUD' ? 'USD' : 'AUD';
-    crmStore.setCurrency(nextCurrency);
+    const next = currentCurrency === 'AUD' ? 'USD' : 'AUD';
+    crmStore.setCurrency(next);
   };
 
-  const tenants = ['Sydney HQ (AU)', 'New York Office (US)', 'London Office (UK)'];
+  // Close dropdown on outside click
+  useEffect(() => {
+    const handler = (e: MouseEvent) => {
+      if (userMenuRef.current && !userMenuRef.current.contains(e.target as Node)) {
+        setShowUserMenu(false);
+      }
+    };
+    document.addEventListener('mousedown', handler);
+    return () => document.removeEventListener('mousedown', handler);
+  }, []);
 
   return (
-    <header className="h-16 bg-white border-b border-slate-200 sticky top-0 z-30 px-4 lg:px-8 flex items-center justify-between shadow-xs">
-      {/* Left section: Mobile menu & Search */}
-      <div className="flex items-center gap-4 flex-1">
+    <header className="h-[60px] bg-white border-b border-slate-200/80 sticky top-0 z-30 px-4 lg:px-6 flex items-center justify-between">
+      {/* ─── Left: Mobile menu + Search trigger ─── */}
+      <div className="flex items-center gap-3">
         <button
           onClick={onOpenMobileMenu}
-          className="p-2 text-slate-500 hover:text-slate-900 rounded-lg lg:hidden"
+          className="p-2 text-slate-400 hover:text-slate-700 hover:bg-slate-100 rounded-lg lg:hidden transition-colors"
         >
-          <Menu className="w-6 h-6" />
+          <Menu className="w-5 h-5" />
         </button>
 
-        {/* Global Search Button */}
+        {/* Search Trigger — compact pill */}
         <button
           onClick={onOpenSearch}
-          className="flex items-center gap-3 px-3.5 py-2 rounded-xl bg-slate-100 hover:bg-slate-200/80 border border-slate-200 text-slate-600 hover:text-slate-900 transition-all max-w-md w-full text-xs font-semibold"
+          className="group flex items-center gap-3 h-10 px-4 rounded-xl bg-slate-50 hover:bg-slate-100 border border-slate-200/80 text-slate-400 hover:text-slate-600 transition-all cursor-pointer w-72 lg:w-80 xl:w-96 min-w-0"
+          aria-label="Open global search"
         >
-          <Search className="w-4 h-4 text-indigo-600" />
-          <span className="flex-1 text-left">Search leads, clients, projects, invoices...</span>
-          <kbd className="hidden sm:inline-flex items-center gap-1 text-[10px] font-mono px-2 py-0.5 rounded bg-white border border-slate-300 text-slate-600 shadow-2xs">
-            ⌘K
+          <span className="flex h-7 w-7 items-center justify-center rounded-lg border border-slate-200/80 bg-white text-slate-500 group-hover:border-indigo-200 group-hover:bg-indigo-50 group-hover:text-indigo-600 transition-colors shrink-0">
+            <Search className="w-4 h-4" strokeWidth={2.25} />
+          </span>
+          <span className="min-w-0 flex-1 text-[13px] font-semibold text-slate-600 group-hover:text-slate-800 truncate whitespace-nowrap">
+            Search leads, clients, projects, invoices...
+          </span>
+          <kbd className="hidden sm:inline-flex items-center gap-0.5 shrink-0 ml-auto text-[10px] font-mono px-1.5 py-0.5 rounded bg-white border border-slate-200 text-slate-400 shadow-xs">
+            <Command className="w-2.5 h-2.5" />K
           </kbd>
         </button>
       </div>
 
-      {/* Right section: Tenant Switcher, Currency, Supabase Status, Role Switcher */}
-      <div className="flex items-center gap-2.5">
-        {/* Tenant/Region Switcher */}
-        <div className="relative hidden xl:block">
-          <button
-            onClick={() => setShowTenantMenu(!showTenantMenu)}
-            className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl border border-slate-200 bg-slate-50 hover:bg-slate-100 text-slate-700 text-xs font-semibold transition-all"
-          >
-            <Globe className="w-3.5 h-3.5 text-slate-500" />
-            <span>{currentTenant}</span>
-            <ChevronDown className="w-3 h-3 text-slate-400" />
-          </button>
-
-          {showTenantMenu && (
-            <div className="absolute right-0 mt-2 w-56 bg-white border border-slate-200 rounded-2xl shadow-xl p-1.5 z-50">
-              <div className="px-3 py-1.5 border-b border-slate-100">
-                <p className="text-[11px] font-bold text-slate-900">Organization Tenant</p>
-                <p className="text-[10px] text-slate-500">Multi-region server node</p>
-              </div>
-              {tenants.map((t) => (
-                <button
-                  key={t}
-                  onClick={() => {
-                    crmStore.setTenant(t);
-                    setShowTenantMenu(false);
-                  }}
-                  className={`w-full text-left px-3 py-2 rounded-xl text-xs font-medium transition-colors flex items-center justify-between ${
-                    currentTenant === t ? 'bg-indigo-50 text-indigo-900 font-bold' : 'text-slate-700 hover:bg-slate-50'
-                  }`}
-                >
-                  <span>{t}</span>
-                  {currentTenant === t && <Check className="w-3.5 h-3.5 text-indigo-600" />}
-                </button>
-              ))}
-            </div>
-          )}
-        </div>
-
-        {/* Currency Switcher Toggle */}
+      {/* ─── Right: Action buttons + Profile ─── */}
+      <div className="flex items-center gap-1">
+        {/* Currency toggle */}
         <button
           onClick={toggleCurrency}
-          title="Toggle display currency (AUD / USD)"
-          className="flex items-center gap-1 px-2.5 py-1.5 rounded-xl border border-slate-200 bg-slate-50 hover:bg-slate-100 text-slate-800 text-xs font-bold transition-all"
+          title={`Currency: ${currentCurrency}`}
+          className="hidden sm:flex items-center gap-1 h-8 px-2.5 rounded-lg text-slate-600 hover:text-slate-900 hover:bg-slate-100 text-xs font-semibold transition-colors"
         >
-          <DollarSign className="w-3.5 h-3.5 text-emerald-600" />
+          <DollarSign className="w-3.5 h-3.5 text-emerald-500" />
           <span>{currentCurrency}</span>
         </button>
 
-        {/* SOC2 & Uptime Badge */}
-        <div className="hidden lg:flex items-center gap-1.5 px-2.5 py-1 rounded-full border border-slate-200 bg-slate-100 text-[10px] font-mono text-slate-600">
-          <Lock className="w-3 h-3 text-indigo-600" />
-          <span>SOC2 Type II • 99.99% SLA</span>
+        {/* Security & Compliance badge */}
+        <div className="hidden xl:flex items-center gap-1.5 h-8 px-2.5 rounded-lg text-[11px] font-medium text-slate-500 bg-slate-50 border border-slate-200/60">
+          <Lock className="w-3 h-3 text-indigo-500" />
+          <span>SOC 2 Audit in Progress</span>
+          <span className="w-1 h-1 rounded-full bg-indigo-400" />
+          <span>Enterprise Security</span>
         </div>
 
-        {/* Supabase Config Pill */}
+        {/* Supabase / Cloud Sync */}
         <button
           onClick={onOpenSupabaseConfig}
-          title="Click to open Supabase Settings & Cloud Sync Manager"
-          className={`hidden md:flex items-center gap-1.5 px-3 py-1.5 rounded-full border text-xs font-bold transition-all hover:scale-105 active:scale-95 shadow-2xs ${
+          title="Cloud Sync Settings"
+          className={`hidden md:flex items-center gap-1.5 h-8 px-2.5 rounded-lg text-xs font-medium transition-colors ${
             isSupabaseConfigured
-              ? 'bg-emerald-50 text-emerald-800 border-emerald-300 hover:bg-emerald-100'
-              : 'bg-indigo-50 text-indigo-800 border-indigo-300 hover:bg-indigo-100'
+              ? 'text-emerald-600 hover:bg-emerald-50'
+              : 'text-slate-500 hover:bg-slate-100'
           }`}
         >
-          <Database className="w-3.5 h-3.5 text-indigo-600" />
-          <span>{isSupabaseConfigured ? 'Supabase Connected' : 'Supabase Cloud Sync'}</span>
+          <Database className="w-3.5 h-3.5" />
+          <span className="hidden lg:inline">{isSupabaseConfigured ? 'Connected' : 'Cloud Sync'}</span>
         </button>
 
-        {/* Role Switcher Pill */}
-        <div className="relative">
+        {/* Divider */}
+        <div className="w-px h-6 bg-slate-200 mx-1.5 hidden sm:block" />
+
+        {/* Notifications (placeholder) */}
+        <button
+          title="Notifications"
+          className="relative flex items-center justify-center w-8 h-8 rounded-lg text-slate-400 hover:text-slate-700 hover:bg-slate-100 transition-colors"
+        >
+          <Bell className="w-4 h-4" />
+          <span className="absolute top-1.5 right-1.5 w-1.5 h-1.5 rounded-full bg-indigo-500" />
+        </button>
+
+        {/* Divider */}
+        <div className="w-px h-6 bg-slate-200 mx-1.5 hidden sm:block" />
+
+        {/* User Profile + Dropdown */}
+        <div className="relative" ref={userMenuRef}>
           <button
-            onClick={() => setShowRoleMenu(!showRoleMenu)}
-            className={`flex items-center gap-2 px-3 py-1.5 rounded-xl border text-xs font-bold transition-all ${
-              isAdmin
-                ? 'bg-indigo-50 text-indigo-700 border-indigo-200 hover:bg-indigo-100'
-                : 'bg-slate-100 text-slate-700 border-slate-300 hover:bg-slate-200'
-            }`}
+            onClick={() => setShowUserMenu(!showUserMenu)}
+            className="flex items-center gap-2.5 h-9 pl-2 pr-2.5 rounded-lg hover:bg-slate-50 transition-colors"
           >
-            <Shield className="w-3.5 h-3.5" />
-            <span>Role: {currentUser.role === 'ADMIN' ? 'Founder (Admin)' : 'Team Member'}</span>
-            <ChevronDown className="w-3.5 h-3.5 opacity-60" />
+            <img
+              src={currentUser.avatar}
+              alt={currentUser.name}
+              className="w-7 h-7 rounded-full object-cover ring-2 ring-white shadow-sm"
+            />
+            <div className="hidden md:block text-left leading-tight">
+              <p className="text-[13px] font-semibold text-slate-800">{currentUser.name}</p>
+              <p className="text-[10px] text-slate-400 font-medium">
+                {isAdmin ? 'Admin' : 'Member'} · {currentUser.department}
+              </p>
+            </div>
+            <ChevronDown className={`w-3.5 h-3.5 text-slate-400 transition-transform ${showUserMenu ? 'rotate-180' : ''}`} />
           </button>
 
-          {/* Role switcher dropdown */}
-          {showRoleMenu && (
-            <div className="absolute right-0 mt-2 w-72 bg-white border border-slate-200 rounded-2xl shadow-xl p-2 z-50">
-              <div className="px-3 py-2 border-b border-slate-100">
-                <p className="text-xs font-bold text-slate-900">Switch Role & User Session</p>
-                <p className="text-[11px] text-slate-500">Test RBAC financial masking in real-time</p>
+          {/* User / Role Switcher Dropdown */}
+          {showUserMenu && (
+            <div className="absolute right-0 mt-2 w-72 bg-white border border-slate-200 rounded-xl shadow-lg shadow-slate-200/50 overflow-hidden z-50 animate-in fade-in slide-in-from-top-2 duration-150">
+              {/* Current user header */}
+              <div className="px-4 py-3 bg-slate-50 border-b border-slate-100">
+                <div className="flex items-center gap-3">
+                  <img
+                    src={currentUser.avatar}
+                    alt={currentUser.name}
+                    className="w-9 h-9 rounded-full object-cover border-2 border-white shadow-sm"
+                  />
+                  <div>
+                    <p className="text-sm font-semibold text-slate-900">{currentUser.name}</p>
+                    <p className="text-[11px] text-slate-500">{currentUser.department} · {currentUser.role}</p>
+                  </div>
+                </div>
               </div>
 
-              <div className="py-1 space-y-1">
+              {/* Switch accounts */}
+              <div className="p-1.5">
+                <p className="px-2.5 py-1.5 text-[10px] font-bold text-slate-400 uppercase tracking-wider">Switch account</p>
                 {allUsers.map((u) => {
                   const isSelected = u.id === currentUser.id;
                   return (
@@ -161,54 +184,50 @@ export const Navbar: React.FC<NavbarProps> = ({
                       key={u.id}
                       onClick={() => {
                         onSwitchUser(u);
-                        setShowRoleMenu(false);
+                        setShowUserMenu(false);
                       }}
-                      className={`w-full flex items-center justify-between p-2 rounded-xl text-xs transition-all ${
+                      className={`w-full flex items-center gap-3 px-2.5 py-2 rounded-lg text-left transition-colors ${
                         isSelected
-                          ? 'bg-indigo-50 text-indigo-900 font-bold'
-                          : 'text-slate-700 hover:bg-slate-100'
+                          ? 'bg-indigo-50'
+                          : 'hover:bg-slate-50'
                       }`}
                     >
-                      <div className="flex items-center gap-2.5">
-                        <img
-                          src={u.avatar}
-                          alt={u.name}
-                          className="w-7 h-7 rounded-full object-cover border border-slate-300"
-                        />
-                        <div className="text-left">
-                          <p className="font-semibold text-slate-900">{u.name}</p>
-                          <p className="text-[10px] text-slate-500">{u.department}</p>
-                        </div>
+                      <img
+                        src={u.avatar}
+                        alt={u.name}
+                        className="w-7 h-7 rounded-full object-cover border border-slate-200"
+                      />
+                      <div className="flex-1 min-w-0">
+                        <p className={`text-[13px] truncate ${isSelected ? 'font-semibold text-indigo-700' : 'font-medium text-slate-700'}`}>
+                          {u.name}
+                        </p>
+                        <p className="text-[10px] text-slate-400">{u.department}</p>
                       </div>
-                      <div className="flex items-center gap-1.5">
+                      <div className="flex items-center gap-1.5 shrink-0">
                         <span
-                          className={`px-1.5 py-0.5 rounded text-[10px] uppercase font-bold ${
-                            u.role === 'ADMIN' ? 'bg-indigo-100 text-indigo-800' : 'bg-slate-100 text-slate-600'
+                          className={`px-1.5 py-0.5 rounded text-[9px] uppercase font-bold tracking-wide ${
+                            u.role === 'ADMIN'
+                              ? 'bg-indigo-100 text-indigo-600'
+                              : 'bg-slate-100 text-slate-500'
                           }`}
                         >
                           {u.role}
                         </span>
-                        {isSelected && <Check className="w-4 h-4 text-indigo-600" />}
+                        {isSelected && <Check className="w-3.5 h-3.5 text-indigo-500" />}
                       </div>
                     </button>
                   );
                 })}
               </div>
+
+              {/* Footer hint */}
+              <div className="px-4 py-2 border-t border-slate-100 bg-slate-50/60">
+                <p className="text-[10px] text-slate-400 text-center">
+                  Switch roles to test RBAC &amp; financial masking
+                </p>
+              </div>
             </div>
           )}
-        </div>
-
-        {/* User Profile */}
-        <div className="flex items-center gap-3 pl-2 border-l border-slate-200">
-          <img
-            src={currentUser.avatar}
-            alt={currentUser.name}
-            className="w-8 h-8 rounded-full object-cover border border-indigo-300"
-          />
-          <div className="hidden sm:block text-left">
-            <p className="text-xs font-bold text-slate-900">{currentUser.name}</p>
-            <p className="text-[10px] text-slate-500">{currentUser.department}</p>
-          </div>
         </div>
       </div>
     </header>

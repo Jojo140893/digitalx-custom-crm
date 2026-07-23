@@ -19,9 +19,12 @@ import {
   ArrowRight,
   Globe,
   Award,
+  Sparkles,
+  Zap,
 } from 'lucide-react';
 import { Lead, LeadStatus, LeadVertical, CountryCode, LeadSource, User, Client } from '@/lib/types';
 import { crmStore } from '@/lib/store';
+import { predictLeadScore } from '@/lib/ai-engine';
 
 interface LeadsModuleProps {
   leads: Lead[];
