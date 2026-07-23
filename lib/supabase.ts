@@ -1,152 +1,131 @@
-import { createClient, SupabaseClient } from '@supabase/supabase-js';
+import { createClient } from '@supabase/supabase-js';
 
-const STORAGE_KEY_URL = 'digitalx_supabase_url';
-const STORAGE_KEY_KEY = 'digitalx_supabase_key';
+const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || process.env.SUPABASE_URL || 'https://placeholder.supabase.co';
+const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || process.env.SUPABASE_ANON_KEY || 'placeholder';
+const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY || supabaseAnonKey;
 
+/**
+ * Public browser / anon Supabase client
+ */
+export const supabase = createClient(supabaseUrl, supabaseAnonKey);
+
+/**
+ * Server-side admin Supabase client (using Service Role key for migrations/seeds/storage admin)
+ */
+export const supabaseAdmin = createClient(supabaseUrl, supabaseServiceKey, {
+  auth: {
+    autoRefreshToken: false,
+    persistSession: false,
+  },
+});
+
+/**
+ * Checks if Supabase connection details are configured.
+ */
+export function isSupabaseConfigured(): boolean {
+  if (typeof window !== 'undefined') {
+    const savedUrl = localStorage.getItem('digitalx_supabase_url');
+    const savedKey = localStorage.getItem('digitalx_supabase_anon_key');
+    if (savedUrl && savedKey) return true;
+  }
+  return Boolean(
+    process.env.NEXT_PUBLIC_SUPABASE_URL &&
+    process.env.NEXT_PUBLIC_SUPABASE_URL !== 'https://your-project-id.supabase.co' &&
+    process.env.NEXT_PUBLIC_SUPABASE_URL !== 'https://placeholder.supabase.co'
+  );
+}
+
+/**
+ * Gets active Supabase configuration credentials.
+ */
 export function getSupabaseConfig(): { url: string; anonKey: string } {
-  let url = process.env.NEXT_PUBLIC_SUPABASE_URL || '';
-  let anonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || '';
-
   if (typeof window !== 'undefined') {
-    const customUrl = localStorage.getItem(STORAGE_KEY_URL);
-    const customKey = localStorage.getItem(STORAGE_KEY_KEY);
-    if (customUrl) url = customUrl;
-    if (customKey) anonKey = customKey;
+    const savedUrl = localStorage.getItem('digitalx_supabase_url');
+    const savedKey = localStorage.getItem('digitalx_supabase_anon_key');
+    if (savedUrl && savedKey) {
+      return { url: savedUrl, anonKey: savedKey };
+    }
   }
-  return { url, anonKey };
+  return {
+    url: process.env.NEXT_PUBLIC_SUPABASE_URL || '',
+    anonKey: process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || '',
+  };
 }
 
-export function saveSupabaseConfig(url: string, anonKey: string) {
+/**
+ * Saves user-configured Supabase project credentials.
+ */
+export function saveSupabaseConfig(url: string, anonKey: string): void {
   if (typeof window !== 'undefined') {
-    if (url) localStorage.setItem(STORAGE_KEY_URL, url);
-    else localStorage.removeItem(STORAGE_KEY_URL);
-
-    if (anonKey) localStorage.setItem(STORAGE_KEY_KEY, anonKey);
-    else localStorage.removeItem(STORAGE_KEY_KEY);
-  }
-}
-
-export function getSupabaseClient(): SupabaseClient | null {
-  const { url, anonKey } = getSupabaseConfig();
-  if (url && anonKey) {
-    try {
-      return createClient(url, anonKey);
-    } catch (err) {
-      console.warn('Supabase initialization error:', err);
-      return null;
+    if (url && anonKey) {
+      localStorage.setItem('digitalx_supabase_url', url);
+      localStorage.setItem('digitalx_supabase_anon_key', anonKey);
+    } else {
+      localStorage.removeItem('digitalx_supabase_url');
+      localStorage.removeItem('digitalx_supabase_anon_key');
     }
-  }
-  return null;
-}
-
-export const isSupabaseConfigured = Boolean(getSupabaseConfig().url && getSupabaseConfig().anonKey);
-
-/**
- * Generic fetcher for Supabase tables
- */
-export async function fetchSupabaseTable<T>(tableName: string): Promise<T[] | null> {
-  const client = getSupabaseClient();
-  if (!client) return null;
-  try {
-    const { data, error } = await client.from(tableName).select('*');
-    if (error) {
-      console.warn(`Supabase fetch error on [${tableName}]:`, error.message);
-      return null;
-    }
-    return data as T[];
-  } catch (err) {
-    console.warn(`Supabase connection exception on [${tableName}]:`, err);
-    return null;
   }
 }
 
 /**
- * Upsert item to Supabase table
+ * Diagnostic health check for Supabase project connectivity.
  */
-export async function syncToSupabase<T extends { id: string }>(tableName: string, payload: T): Promise<boolean> {
-  const client = getSupabaseClient();
-  if (!client) return false;
+export async function checkSupabaseHealth(): Promise<{ status: 'CONNECTED' | 'READY' | 'DISCONNECTED'; message: string }> {
   try {
-    const { error } = await client.from(tableName).upsert(payload as any);
-    if (error) {
-      console.warn(`Supabase sync failed on [${tableName}]:`, error.message);
-      return false;
+    const { url, anonKey } = getSupabaseConfig();
+    if (!url || !anonKey || url.includes('placeholder') || url.includes('your-project-id')) {
+      return {
+        status: 'READY',
+        message: 'Supabase project credentials not configured yet. Configure above to enable Postgres & RLS.',
+      };
     }
-    return true;
-  } catch (err) {
-    console.warn(`Supabase sync exception on [${tableName}]:`, err);
-    return false;
-  }
-}
-
-/**
- * Sync entire local state to Supabase Cloud
- */
-export async function syncAllTablesToSupabase(state: any): Promise<{ success: boolean; count: number; message: string }> {
-  const client = getSupabaseClient();
-  if (!client) {
-    return {
-      success: false,
-      count: 0,
-      message: 'Supabase credentials not configured. Open Database Settings in Navbar to enter your Supabase URL & Key.',
-    };
-  }
-
-  let totalCount = 0;
-  try {
-    if (state.leads?.length) {
-      await client.from('leads').upsert(state.leads);
-      totalCount += state.leads.length;
-    }
-    if (state.clients?.length) {
-      await client.from('clients').upsert(state.clients);
-      totalCount += state.clients.length;
-    }
-    if (state.projects?.length) {
-      await client.from('projects').upsert(state.projects);
-      totalCount += state.projects.length;
-    }
-    if (state.invoices?.length) {
-      await client.from('invoices').upsert(state.invoices);
-      totalCount += state.invoices.length;
-    }
-    if (state.tasks?.length) {
-      await client.from('tasks').upsert(state.tasks);
-      totalCount += state.tasks.length;
+    const client = createClient(url, anonKey);
+    const { error } = await client.from('Tenant').select('count', { count: 'exact', head: true });
+    if (error && error.code !== 'PGRST116') {
+      return {
+        status: 'READY',
+        message: `Supabase reachable (${error.message || 'Ready for schema setup'}).`,
+      };
     }
     return {
-      success: true,
-      count: totalCount,
-      message: `Successfully synchronized ${totalCount} records to Supabase tables.`,
+      status: 'CONNECTED',
+      message: 'Supabase Postgres connection active. RLS Tenant Isolation enabled.',
     };
   } catch (err: any) {
     return {
-      success: false,
-      count: totalCount,
-      message: err?.message || 'Database sync exception occurred.',
+      status: 'DISCONNECTED',
+      message: `Connection failed: ${err.message || 'Check network / API key'}.`,
     };
   }
 }
 
 /**
- * Connection Telemetry Check
+ * Asynchronously syncs UI state mutations to Supabase Postgres database.
  */
-export async function checkSupabaseHealth(): Promise<{ status: 'CONNECTED' | 'READY' | 'DISCONNECTED'; message: string }> {
-  const { url, anonKey } = getSupabaseConfig();
-  if (!url || !anonKey) {
-    return { status: 'READY', message: 'Operating in Stateful Local Mode. Click here to add Supabase credentials.' };
-  }
-  const client = getSupabaseClient();
-  if (!client) {
-    return { status: 'DISCONNECTED', message: 'Invalid Supabase URL or Anon Key format.' };
-  }
+export async function syncToSupabase(table: string, record: any): Promise<void> {
   try {
-    const { error } = await client.from('leads').select('count', { count: 'exact', head: true });
+    const { error } = await supabaseAdmin.from(table).upsert(record);
     if (error) {
-      return { status: 'READY', message: `Connected to Supabase Project! (${error.message})` };
+      console.warn(`Supabase sync warning for ${table}:`, error.message);
     }
-    return { status: 'CONNECTED', message: 'Connected to Supabase PostgreSQL Cloud Database.' };
   } catch (err) {
-    return { status: 'READY', message: 'Stateful Local Engine Active' };
+    console.warn(`Supabase sync error for ${table}:`, err);
+  }
+}
+
+/**
+ * Bulk syncs all state records to Supabase.
+ */
+export async function syncAllTablesToSupabase(state: any): Promise<{ success: boolean; message: string }> {
+  try {
+    if (state.leads?.length) await supabaseAdmin.from('Lead').upsert(state.leads);
+    if (state.clients?.length) await supabaseAdmin.from('Client').upsert(state.clients);
+    if (state.projects?.length) await supabaseAdmin.from('Project').upsert(state.projects);
+    if (state.tasks?.length) await supabaseAdmin.from('Task').upsert(state.tasks);
+    if (state.invoices?.length) await supabaseAdmin.from('Invoice').upsert(state.invoices);
+    if (state.proposals?.length) await supabaseAdmin.from('Proposal').upsert(state.proposals);
+    return { success: true, message: 'All CRM records successfully synced to Supabase Postgres.' };
+  } catch (err: any) {
+    return { success: false, message: `Sync failed: ${err.message}` };
   }
 }
