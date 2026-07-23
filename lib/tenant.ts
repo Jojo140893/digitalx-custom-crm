@@ -66,3 +66,22 @@ export function decryptSecret(encrypted: string): string {
   const raw = encrypted.replace('enc_v1_', '');
   return Buffer.from(raw, 'base64').toString('utf-8');
 }
+
+/**
+ * Retention Policy Purge Utility
+ * Automatically filters out call recordings and audit logs exceeding retention period
+ */
+export function purgeExpiredTenantLogs<T extends { createdAt?: string; timestamp?: string }>(
+  records: T[],
+  retentionMonths: number = 12
+): T[] {
+  const cutoffDate = new Date();
+  cutoffDate.setMonth(cutoffDate.getMonth() - retentionMonths);
+
+  return records.filter((r) => {
+    const rawDate = r.createdAt || r.timestamp;
+    if (!rawDate) return true;
+    const date = new Date(rawDate);
+    return date >= cutoffDate;
+  });
+}

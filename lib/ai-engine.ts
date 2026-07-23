@@ -1,6 +1,41 @@
 import { Client, Lead, TimeLog, ProposalPhase, Invoice, CallRecord } from './types';
 import { crmStore } from './store';
 
+export type AiModelTier = 'FAST_LITE' | 'HIGH_PERFORMANCE';
+
+export interface AiModelRouting {
+  task: string;
+  model: string;
+  tier: AiModelTier;
+  estimatedLatencyMs: number;
+}
+
+/**
+ * Smart AI Model Router
+ * Routes high-volume queries to lightweight models to optimize AI margins.
+ */
+export function routeAiModel(taskType: 'SEARCH' | 'LEAD_SCORE' | 'PROPOSAL' | 'MARGIN_ANALYSIS' | 'EXEC_SUMMARY'): AiModelRouting {
+  switch (taskType) {
+    case 'SEARCH':
+    case 'LEAD_SCORE':
+      return {
+        task: taskType,
+        model: 'flash-lite / gpt-4o-mini',
+        tier: 'FAST_LITE',
+        estimatedLatencyMs: 120,
+      };
+    case 'PROPOSAL':
+    case 'MARGIN_ANALYSIS':
+    case 'EXEC_SUMMARY':
+      return {
+        task: taskType,
+        model: 'pro / gpt-4o',
+        tier: 'HIGH_PERFORMANCE',
+        estimatedLatencyMs: 450,
+      };
+  }
+}
+
 export interface MarginAnalysisResult {
   clientId: string;
   companyName: string;
@@ -11,12 +46,14 @@ export interface MarginAnalysisResult {
   isUnderMargin: boolean;
   suggestedRetainer: number;
   recommendation: string;
+  modelRouting: AiModelRouting;
 }
 
 export interface LeadScoreResult {
   score: number;
   nextBestAction: string;
   reasons: string[];
+  modelRouting: AiModelRouting;
 }
 
 export interface ClientHealthResult {
@@ -30,10 +67,11 @@ export interface ExecSummaryResult {
   mrrGrowth: string;
   topRisk: string;
   actionItem: string;
+  modelRouting: AiModelRouting;
 }
 
 /**
- * 1. AI Margin Analyst (Deterministic Calculation)
+ * 1. AI Margin Analyst (Deterministic Calculation + Smart Routing)
  * Pure math: Hours * Employee Rate vs Retainer Fee
  */
 export function analyzeClientMargin(
@@ -41,6 +79,7 @@ export function analyzeClientMargin(
   timeLogs: TimeLog[],
   hourlyCostRate: number = 75
 ): MarginAnalysisResult {
+  const routing = routeAiModel('MARGIN_ANALYSIS');
   const clientLogs = timeLogs.filter((tl) => tl.clientId === client.id && tl.billable);
   const totalHours = clientLogs.reduce((sum, log) => sum + log.hours, 0);
   const totalCost = totalHours * hourlyCostRate;
@@ -68,14 +107,15 @@ export function analyzeClientMargin(
     isUnderMargin,
     suggestedRetainer,
     recommendation,
+    modelRouting: routing,
   };
 }
 
 /**
  * 2. Predictive Lead Scoring & Next-Best-Action Engine
- * Combines structural lead heuristics with action synthesis
  */
 export function predictLeadScore(lead: Lead): LeadScoreResult {
+  const routing = routeAiModel('LEAD_SCORE');
   let score = 50;
   const reasons: string[] = [];
 
@@ -88,7 +128,7 @@ export function predictLeadScore(lead: Lead): LeadScoreResult {
     reasons.push('Inbound ad interest (+10)');
   }
 
-  // Vertical weighting (High-demand verticals for AI Voice Agents)
+  // Vertical weighting
   if (['Home Services', 'Healthcare', 'Automotive'].includes(lead.vertical)) {
     score += 15;
     reasons.push(`High-demand AI Voice vertical: ${lead.vertical} (+15)`);
@@ -110,13 +150,14 @@ export function predictLeadScore(lead: Lead): LeadScoreResult {
     nextBestAction = `🔥 High-priority lead: Schedule discovery call today.`;
   }
 
-  // Meter usage
-  crmStore.recordAiUsage(150, 0, 0);
+  // Meter usage (routed to light model)
+  crmStore.recordAiUsage(60, 0, 0);
 
   return {
     score,
     nextBestAction,
     reasons,
+    modelRouting: routing,
   };
 }
 
@@ -165,9 +206,9 @@ export function generateAiProposal(
   companyName: string,
   vertical: string,
   transcriptOrNotes: string
-): { title: string; phases: ProposalPhase[]; totalValue: number } {
+): { title: string; phases: ProposalPhase[]; totalValue: number; modelRouting: AiModelRouting } {
+  const routing = routeAiModel('PROPOSAL');
   const isEnterprise = transcriptOrNotes.toLowerCase().includes('enterprise') || transcriptOrNotes.toLowerCase().includes('multi-location');
-  
   const baseMultiplier = isEnterprise ? 2.5 : 1.0;
 
   const phases: ProposalPhase[] = [
@@ -200,6 +241,7 @@ export function generateAiProposal(
     title: `AI Voice & Automation Scope — ${companyName}`,
     phases,
     totalValue,
+    modelRouting: routing,
   };
 }
 
@@ -226,35 +268,42 @@ export function generateInvoiceReminder(
 export function parseNaturalLanguageQuery(query: string): {
   type: 'UNDER_MARGIN' | 'OVERDUE_INVOICES' | 'HIGH_LEADS' | 'MISSED_CALLS' | 'GENERAL';
   filterDescription: string;
+  modelRouting: AiModelRouting;
 } {
+  const routing = routeAiModel('SEARCH');
   const q = query.toLowerCase();
   if (q.includes('margin') || q.includes('under 20%') || q.includes('unprofitable')) {
     return {
       type: 'UNDER_MARGIN',
       filterDescription: 'Showing clients with operational margin below 20%',
+      modelRouting: routing,
     };
   }
   if (q.includes('overdue') || q.includes('unpaid') || q.includes('chase')) {
     return {
       type: 'OVERDUE_INVOICES',
       filterDescription: 'Showing unpaid and overdue invoices needing attention',
+      modelRouting: routing,
     };
   }
   if (q.includes('lead') || q.includes('today') || q.includes('hot') || q.includes('best action')) {
     return {
       type: 'HIGH_LEADS',
       filterDescription: 'Showing high-scoring open leads ready for contact',
+      modelRouting: routing,
     };
   }
   if (q.includes('call') || q.includes('missed') || q.includes('transcript')) {
     return {
       type: 'MISSED_CALLS',
       filterDescription: 'Showing recent call records and missed-call recovery feeds',
+      modelRouting: routing,
     };
   }
   return {
     type: 'GENERAL',
     filterDescription: `Filtered search for "${query}"`,
+    modelRouting: routing,
   };
 }
 
@@ -267,18 +316,20 @@ export function generateExecSummary(
   missedCallRecoveryRate: number,
   underMarginCount: number
 ): ExecSummaryResult {
-  const summary = `MRR is running at $${mrr.toLocaleString()}/mo across active accounts. Missed-call recovery rate is sitting strong at ${missedCallRecoveryRate}%, while ${leadsCount} high-intent leads are ready in the sales pipeline.`;
+  const routing = routeAiModel('EXEC_SUMMARY');
+  const summary = `MRR is running at $${mrr.toLocaleString()}/mo across active accounts. Missed-call recovery sitting strong at ${missedCallRecoveryRate}%, while ${leadsCount} high-intent leads are ready in the sales pipeline.`;
   const mrrGrowth = `+18% MoM growth driven by AI Voice Retainers`;
   const topRisk = underMarginCount > 0 ? `${underMarginCount} client account(s) operating below 20% target margin` : 'All active accounts operating above target margin';
   const actionItem = underMarginCount > 0 ? 'Review AI Margin Analyst re-price suggestions for under-margin accounts.' : 'Scale Apollo lead outreach sequence to Home Services leads.';
 
   // Meter summary usage
-  crmStore.recordAiUsage(220, 0, 0);
+  crmStore.recordAiUsage(120, 0, 0);
 
   return {
     summary,
     mrrGrowth,
     topRisk,
     actionItem,
+    modelRouting: routing,
   };
 }

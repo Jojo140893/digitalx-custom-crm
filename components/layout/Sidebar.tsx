@@ -200,7 +200,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
               <span>DigitalX Global Corp</span>
               <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" title="Systems Operational" />
             </div>
-            <p className="text-slate-500 text-[11px] font-medium">Sydney (syd1) • NYC (iad1)</p>
+            <p className="text-slate-500 text-[11px] font-medium">Sydney HQ • Isolated Workspace</p>
             <p className="text-[10px] text-slate-500 font-mono pt-1 border-t border-slate-100">Security: Encrypted • Multi-Tenant</p>
           </div>
         </div>
